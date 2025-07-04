@@ -51,6 +51,27 @@ The production-ready extension will be output to the `dist/` directory.
 npm run lint
 ```
 
+## Hot Reloading for Extension Development
+
+This project supports automatic extension reloading in Chrome during development using [crx-hotreload](https://github.com/xpl/crx-hotreload).
+
+### How it works
+- Any time you change your code, the extension will rebuild and automatically reload itself in Chrome—no need to click the reload button manually.
+
+### Setup (already configured)
+- `crx-hotreload.js` is included and copied to the build output.
+- The background script imports it for hot reload support.
+
+### Usage
+1. Run the watcher to continuously build to `dist/`:
+   ```bash
+   npm run watch
+   ```
+2. Load the `dist` folder as an unpacked extension in Chrome (`chrome://extensions/`).
+3. When you make changes, the extension will reload itself automatically in Chrome.
+
+If you encounter issues, see the [crx-hotreload documentation](https://github.com/xpl/crx-hotreload) for troubleshooting.
+
 ## Project Structure
 
 - `src/` — React source code

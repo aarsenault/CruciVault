@@ -13,6 +13,8 @@ export default defineConfig({
       targets: [
         { src: "public/manifest.json", dest: "." },
         { src: "public/*.png", dest: "." },
+        { src: "background.js", dest: "." },
+        { src: "crx-hotreload.js", dest: "." },
       ],
     }),
   ],

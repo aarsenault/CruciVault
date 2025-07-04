@@ -3,13 +3,12 @@ import { generateWallet } from "./lib/bittensor";
 import { encryptMnemonic, decryptMnemonic } from "./lib/crypto";
 import { Card, CardContent } from "./components/ui/card";
 import { Button } from "./components/ui/button";
-import { Input } from "./components/ui/input";
 import { NetBackground } from "./components/NetBackground";
 
 const App: React.FC = () => {
   const [mnemonic, setMnemonic] = useState<string | null>(null);
   const [address, setAddress] = useState<string | null>(null);
-  const [password, setPassword] = useState("");
+  const [password] = useState("");
   const [saved, setSaved] = useState<string | null>(null);
   const [showMnemonic, setShowMnemonic] = useState(false);
 
@@ -38,38 +37,60 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gray-950">
+    <div
+      className="relative min-h-screen flex flex-col overflow-hidden bg-gray-950"
+      style={{ height: "100vh", overflow: "hidden" }}
+    >
       {/* full‐screen net effect behind */}
       <div className="absolute inset-0 z-0">
         <NetBackground />
       </div>
 
-      {/* phone-sized UI card, reduced height, minimal blur */}
-      <Card className="relative z-10 w-[375px] h-[567px] px-6 py-8 bg-transparent border border-white border-opacity-30 rounded-2xl shadow-2xl">
+      {/* Full-height sidebar layout */}
+      <Card className="relative z-10 w-full min-h-screen px-0 py-0 bg-transparent border-none rounded-none shadow-none flex flex-col">
         <CardContent className="flex flex-col h-full p-0">
-          <h1 className="text-2xl font-bold text-white mb-4">
+          <h1 className="text-2xl font-bold text-white mb-4 pt-8 px-8">
             Bittensor Wallet
           </h1>
-          <div className="flex-1" />
 
-          {/* Main wallet controls area, now blurred and semi-transparent, spanning the popup width */}
-          <div className="w-full px-0 pb-0">
-            <div className="w-full backdrop-blur bg-white/10 rounded-xl p-4 shadow-lg">
+          {/* Controls area absolutely positioned 2/3 down the sidebar */}
+          <div
+            className="w-full flex flex-col items-center"
+            style={{
+              position: "absolute",
+              top: "66%",
+              left: 0,
+              right: 0,
+              transform: "translateY(-33%)",
+              zIndex: 20,
+              pointerEvents: "auto",
+            }}
+          >
+            <div className="w-[90%] max-w-md backdrop-blur bg-white/10 rounded-xl p-4 shadow-lg">
               {!mnemonic && (
                 <>
                   <Button
-                    className="w-full mb-2 border-2 border-white !border-white"
+                    className="w-full mb-2 border-2 border-white !border-white text-lg"
                     onClick={handleGenerate}
                   >
                     Generate new Wallet
                   </Button>
                   <div className="text-center text-white mb-4">or</div>
                   <Button
-                    className="w-full mb-4 border-2 border-white !border-white"
+                    className="w-full mb-4 border-2 border-white !border-white text-lg"
                     onClick={handleRestore}
                   >
                     Restore an Existing Wallet.
                   </Button>
+                  <a
+                    href="https://learnbittensor.org/"  
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block text-center underline transition mb-2 text-yellow-300 hover:text-yellow-400"
+                    style={{ fontSize: "1rem", marginTop: "0.5rem" }}
+                  >
+                    Learn Bittensor
+                  </a>
                 </>
               )}
 
@@ -86,14 +107,6 @@ const App: React.FC = () => {
                   {mnemonic}
                 </div>
               )}
-
-              <Input
-                type="password"
-                placeholder="Enter password"
-                className="mb-4 bg-white bg-opacity-80 text-white placeholder-gray-300"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
 
               {mnemonic && (
                 <div className="flex gap-2 mb-4">
