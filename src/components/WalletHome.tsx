@@ -1,10 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { Button } from "components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { getTaoBalance, getAddressFromMnemonic } from "lib/bittensor";
+import { Button } from "components/ui/button";
 import { Input } from "components/ui/input";
-import Identicon from "@polkadot/react-identicon";
-import { storage } from "lib/storage";
 import {
   Dialog,
   DialogContent,
@@ -13,19 +10,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "components/ui/dialog";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "components/ui/tooltip";
-import {
-  Home as HomeIcon,
-  Send as SendIcon,
-  List as ListIcon,
-  Settings as SettingsIcon,
-  Lock as LockIcon,
-} from "lucide-react";
+import { Identicon } from "@polkadot/react-identicon";
+import { getAddressFromMnemonic, getTaoBalance } from "lib/bittensor";
+import { storage } from "lib/storage";
 import { useSecurity } from "contexts/SecurityContext";
 import { EditIcon, CopyIcon } from "components/icons";
 
@@ -38,7 +25,7 @@ interface WalletData {
 
 export const WalletHome: React.FC = () => {
   const navigate = useNavigate();
-  const { resetActivityTimer, mnemonic, lockApp } = useSecurity();
+  const { resetActivityTimer, mnemonic } = useSecurity();
 
   const [address, setAddress] = useState<string | null>(null);
   const [walletData, setWalletData] = useState<WalletData | null>(null);
@@ -292,19 +279,17 @@ export const WalletHome: React.FC = () => {
     );
   };
 
-  // Show loading state
   if (isLoading) {
     return (
       <div className="flex flex-col gap-6 items-center justify-center h-full relative z-10">
         <div className="text-white text-center text-xl drop-shadow-lg">
-          Loading
+          Loading wallet data...
         </div>
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
       </div>
     );
   }
 
-  // Show wallet UI if wallet exists but data is loading
   if (!address || !walletData) {
     return (
       <div className="flex flex-col gap-6 items-center justify-center h-full relative z-10">
@@ -317,90 +302,7 @@ export const WalletHome: React.FC = () => {
   }
 
   return (
-    <div className="flex flex-col h-full">
-      {/* Navigation Menu */}
-      <TooltipProvider>
-        <div className="w-full">
-          <div className="flex w-full">
-            <Tooltip delayDuration={1500}>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  onClick={() => navigate("/home")}
-                  className="nav-button flex-1 h-12 bg-gray-800 hover:bg-gray-700 hover:text-yellow-400 text-white border border-white transition-colors"
-                >
-                  <HomeIcon className="w-8 h-8" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side="bottom">
-                <p>Home</p>
-              </TooltipContent>
-            </Tooltip>
-
-            <Tooltip delayDuration={1500}>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  onClick={() => navigate("/send")}
-                  className="nav-button flex-1 h-12 bg-gray-800 hover:bg-gray-700 hover:text-yellow-400 text-white border border-white transition-colors"
-                >
-                  <SendIcon className="w-8 h-8" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side="bottom">
-                <p>Send</p>
-              </TooltipContent>
-            </Tooltip>
-
-            <Tooltip delayDuration={1500}>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  onClick={() => navigate("/transactions")}
-                  className="nav-button flex-1 h-12 bg-gray-800 hover:bg-gray-700 hover:text-yellow-400 text-white border border-white transition-colors"
-                >
-                  <ListIcon className="w-8 h-8" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side="bottom">
-                <p>Transactions</p>
-              </TooltipContent>
-            </Tooltip>
-
-            <Tooltip delayDuration={1500}>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  onClick={() => navigate("/settings")}
-                  className="nav-button flex-1 h-12 bg-gray-800 hover:bg-gray-700 hover:text-yellow-400 text-white border border-white transition-colors"
-                >
-                  <SettingsIcon className="w-8 h-8" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side="bottom">
-                <p>Settings</p>
-              </TooltipContent>
-            </Tooltip>
-
-            <Tooltip delayDuration={1500}>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  onClick={lockApp}
-                  className="nav-button flex-1 h-12 bg-gray-800 hover:bg-gray-700 hover:text-yellow-400 text-white border border-white transition-colors"
-                >
-                  <LockIcon className="w-8 h-8" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side="bottom">
-                <p>Lock</p>
-              </TooltipContent>
-            </Tooltip>
-          </div>
-        </div>
-      </TooltipProvider>
-
-      {/* Wallet Info - Takes up most of the space */}
+    <div className="h-full p-0 flex flex-col">
       <div className="flex-1 px-4 pb-4">
         <div className="h-full p-6 flex flex-col">
           <div className="flex items-center gap-4 mb-6">

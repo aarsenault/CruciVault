@@ -4,6 +4,7 @@ import { NetBackground } from "components/NetBackground";
 import { BackgroundOverlay } from "components/BackgroundOverlay";
 import { useNavigate, useLocation } from "react-router-dom";
 import { ChevronLeftIcon } from "components/icons";
+import { WalletNavigation } from "components/WalletNavigation";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -27,8 +28,11 @@ export const Layout: React.FC<LayoutProps> = ({
     }
   };
 
-  // Check if we're in the main app (not onboarding)
-  const isMainApp = !location.pathname.startsWith("/onboarding");
+  // Check if we're in the main app (not onboarding or lock)
+  const isOnboarding =
+    location.pathname === "/" || location.pathname.startsWith("/onboarding");
+  const isLockScreen = location.pathname === "/lock";
+  const showNav = !isOnboarding && !isLockScreen;
 
   return (
     <div
@@ -64,16 +68,22 @@ export const Layout: React.FC<LayoutProps> = ({
             </div>
           </div>
 
-          {isMainApp ? (
-            // Main app layout - Takes remaining space
+          {isOnboarding ? (
             <BackgroundOverlay>
-              <div className="flex-1 flex flex-col">{children}</div>
+              <div className="flex-1 flex flex-col">
+                <div className="w-full h-full bg-black/20">{children}</div>
+              </div>
             </BackgroundOverlay>
           ) : (
-            // Onboarding layout - Centered content
+            // Main app layout - Takes remaining space
             <BackgroundOverlay>
-              <div className="flex-1 flex flex-col items-center justify-center">
-                <div className="w-[90%] max-w-md backdrop-blur bg-white/10 rounded-xl p-6 shadow-lg">
+              <div className="flex flex-col flex-1">
+                {showNav && (
+                  <div className="px-4 pb-2 pt-2">
+                    <WalletNavigation />
+                  </div>
+                )}
+                <div className="flex-1 flex flex-col px-4 pb-6 pt-2">
                   {children}
                 </div>
               </div>

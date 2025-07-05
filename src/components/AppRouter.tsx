@@ -122,6 +122,7 @@ export const AppRouter: React.FC = () => {
       !isLocked &&
       location.pathname !== "/home" &&
       (location.pathname === "/" ||
+        location.pathname === "/lock" ||
         location.pathname === "/onboarding" ||
         location.pathname.startsWith("/onboarding/"))
     ) {

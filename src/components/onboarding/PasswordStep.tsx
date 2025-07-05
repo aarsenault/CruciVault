@@ -127,7 +127,7 @@ export const PasswordStep: React.FC<PasswordStepProps> = ({ onNext }) => {
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="space-y-2">
+                <div className="space-y-3">
                   <label className="text-sm font-medium text-gray-300">
                     Password
                   </label>
@@ -186,7 +186,7 @@ export const PasswordStep: React.FC<PasswordStepProps> = ({ onNext }) => {
                   </div>
                 )}
 
-                <div className="space-y-2">
+                <div className="space-y-3">
                   <label className="text-sm font-medium text-gray-300">
                     Confirm Password
                   </label>

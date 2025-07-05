@@ -13,6 +13,7 @@ A secure Bittensor wallet extension for Chrome.
 ## UI
 
 ### Navigation
+
 - **Swipe Navigation**: In the main wallet state, you can navigate between different sections (Home, Send, Transactions, Settings) by swiping left or right on the screen. This provides an intuitive touch-based navigation experience alongside the traditional navigation menu.
 
 ## Security
@@ -27,22 +28,26 @@ A secure Bittensor wallet extension for Chrome.
 - **Manual lock:** The user can lock the app at any time from the navigation bar.
 
 ### Seed Phrase Protection
+
 - **Fake Display Protection**: When the mnemonic is in "hidden" state, the wallet displays fake text instead of the actual seed phrase. This prevents accidental exposure through browser developer tools, screen captures, or other inspection methods.
 - **Explicit Reveal**: The real seed phrase is only displayed when the user explicitly clicks the reveal button, providing an additional layer of security.
 - **Blur Effect**: Visual blurring is applied to the mnemonic display area when hidden, making it impossible to read even if partially visible.
 
 ### Browser Extension Security
+
 - **Manifest V3**: Built using Chrome's latest extension manifest version with strict Content Security Policy (CSP) for enhanced security.
 - **WASM Support**: Requires `wasm-unsafe-eval` in CSP to support cryptographic operations via WebAssembly for optimal performance and security.
 - **Local Storage**: All sensitive data is stored locally within the extension's secure context.
 
 ### Dependency Security
+
 - **Pinned Package Versions**: All Polkadot cryptographic packages are pinned to exact versions to prevent supply chain attacks and ensure reproducible builds.
 - **Supply Chain Attack Prevention**: By removing version ranges (^), malicious code cannot be introduced through automatic package updates.
 - **Audit Trail**: Specific versions can be audited and verified, providing transparency about exactly what code is running.
 - **Controlled Updates**: Any future updates to critical cryptographic dependencies require explicit review and approval.
 
 #### Why `wasm-unsafe-eval` is Required
+
 The extension requires `wasm-unsafe-eval` in the Content Security Policy because:
 - **Cryptographic Performance**: WebAssembly provides significantly faster cryptographic operations compared to pure JavaScript
 - **Security Standards**: The Polkadot ecosystem uses WASM for cryptographic functions to meet industry security standards
@@ -58,16 +63,6 @@ The extension requires `wasm-unsafe-eval` in the Content Security Policy because
 ### Password Strength Requirements
 
 CruciVault uses the industry-standard **zxcvbn** library to measure password strength and enforce security requirements.
-
-#### Password Strength Measurement
-
-The app evaluates passwords using multiple criteria:
-- **Length**: Longer passwords are generally stronger
-- **Character variety**: Mix of uppercase, lowercase, numbers, and symbols
-- **Common patterns**: Avoids easily guessable sequences (123456, qwerty, etc.)
-- **Dictionary words**: Checks against common word lists and variations
-- **Personal information**: Identifies patterns that might be personal (dates, names, etc.)
-- **Entropy**: Calculates the actual randomness and unpredictability
 
 #### Strength Levels
 

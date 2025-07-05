@@ -1,19 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import {
-  NavigationMenu,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-  navigationMenuTriggerStyle,
-} from "components/ui/navigation-menu";
-import {
-  Home as HomeIcon,
-  Send as SendIcon,
-  List as ListIcon,
-  Settings as SettingsIcon,
-  Lock as LockIcon,
-} from "lucide-react";
 import { storage } from "lib/storage";
 
 interface LocationState {
@@ -139,124 +125,43 @@ export const Transactions: React.FC = () => {
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      {/* Navigation Menu */}
-      <div className="p-4 pb-2">
-        <NavigationMenu className="w-full">
-          <NavigationMenuList className="w-full justify-between">
-            <NavigationMenuItem>
-              <NavigationMenuLink
-                className={navigationMenuTriggerStyle()}
-                onClick={() =>
-                  navigate("/home", {
-                    state: { mnemonic: location.state?.mnemonic, address },
-                  })
-                }
-              >
-                <span className="flex items-center gap-1">
-                  <HomeIcon className="w-4 h-4" /> Home
-                </span>
-              </NavigationMenuLink>
-            </NavigationMenuItem>
-            <NavigationMenuItem>
-              <NavigationMenuLink
-                className={navigationMenuTriggerStyle()}
-                onClick={() =>
-                  navigate("/send", {
-                    state: { mnemonic: location.state?.mnemonic, address },
-                  })
-                }
-              >
-                <span className="flex items-center gap-1">
-                  <SendIcon className="w-4 h-4" /> Send
-                </span>
-              </NavigationMenuLink>
-            </NavigationMenuItem>
-            <NavigationMenuItem>
-              <NavigationMenuLink
-                className={navigationMenuTriggerStyle()}
-                onClick={() =>
-                  navigate("/transactions", {
-                    state: { mnemonic: location.state?.mnemonic, address },
-                  })
-                }
-              >
-                <span className="flex items-center gap-1">
-                  <ListIcon className="w-4 h-4" /> Transactions
-                </span>
-              </NavigationMenuLink>
-            </NavigationMenuItem>
-            <NavigationMenuItem>
-              <NavigationMenuLink
-                className={navigationMenuTriggerStyle()}
-                onClick={() =>
-                  navigate("/settings", {
-                    state: { mnemonic: location.state?.mnemonic, address },
-                  })
-                }
-              >
-                <span className="flex items-center gap-1">
-                  <SettingsIcon className="w-4 h-4" /> Settings
-                </span>
-              </NavigationMenuLink>
-            </NavigationMenuItem>
-            <NavigationMenuItem>
-              <NavigationMenuLink
-                className={navigationMenuTriggerStyle()}
-                onClick={() =>
-                  navigate("/lock", {
-                    state: { mnemonic: location.state?.mnemonic, address },
-                  })
-                }
-              >
-                <span className="flex items-center gap-1">
-                  <LockIcon className="w-4 h-4" /> Lock
-                </span>
-              </NavigationMenuLink>
-            </NavigationMenuItem>
-          </NavigationMenuList>
-        </NavigationMenu>
-      </div>
+    <div className="">
+      <h2 className="text-white text-2xl font-bold mb-6">
+        Transaction History
+      </h2>
 
-      {/* Transactions List */}
-      <div className="p-6">
-        <h2 className="text-white text-2xl font-bold mb-6">
-          Transaction History
-        </h2>
-
-        {transactions.length === 0 ? (
-          <div className="text-gray-400 text-center py-8">
-            No transactions found
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {transactions.map((tx) => (
-              <div
-                key={tx.id}
-                className="flex items-center justify-between p-4 bg-gray-800/50 rounded-lg border border-gray-700"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="text-2xl">{getTypeIcon(tx.type)}</div>
-                  <div>
-                    <div className="text-white font-medium">
-                      {tx.type === "send" ? "Sent" : "Received"} {tx.amount} TAO
-                    </div>
-                    <div className="text-gray-400 text-sm">{tx.address}</div>
-                    <div className="text-gray-500 text-xs">
-                      {formatDate(tx.timestamp)}
-                    </div>
+      {transactions.length === 0 ? (
+        <div className="text-gray-400 text-center py-8">
+          No transactions found
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {transactions.map((tx) => (
+            <div
+              key={tx.id}
+              className="flex items-center justify-between p-4 bg-gray-800/50 rounded-lg border border-gray-700"
+            >
+              <div className="flex items-center gap-3">
+                <div className="text-2xl">{getTypeIcon(tx.type)}</div>
+                <div>
+                  <div className="text-white font-medium">
+                    {tx.type === "send" ? "Sent" : "Received"} {tx.amount} TAO
+                  </div>
+                  <div className="text-gray-400 text-sm">{tx.address}</div>
+                  <div className="text-gray-500 text-xs">
+                    {formatDate(tx.timestamp)}
                   </div>
                 </div>
-                <div
-                  className={`text-sm font-medium ${getStatusColor(tx.status)}`}
-                >
-                  {tx.status.charAt(0).toUpperCase() + tx.status.slice(1)}
-                </div>
               </div>
-            ))}
-          </div>
-        )}
-      </div>
+              <div
+                className={`text-sm font-medium ${getStatusColor(tx.status)}`}
+              >
+                {tx.status.charAt(0).toUpperCase() + tx.status.slice(1)}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
