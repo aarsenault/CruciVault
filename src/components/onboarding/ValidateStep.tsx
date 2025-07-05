@@ -1,14 +1,13 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Button } from "components/ui/button";
 import { Input } from "components/ui/input";
-import { useNavigate, useLocation } from "react-router-dom";
-import { useSecurity } from "contexts/SecurityContext";
-import { encryptMnemonic } from "lib/crypto";
 
-interface LocationState {
+interface ValidateStepProps {
   mnemonic: string;
   address: string;
   validateIndex?: number;
+  onComplete: () => void;
+  onBack: () => void;
 }
 
 declare global {
@@ -57,25 +56,18 @@ const getStorage = () => {
   }
 };
 
-export const ValidateStep: React.FC = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const { unlockApp } = useSecurity();
-  const {
-    mnemonic,
-    address,
-    validateIndex: existingIndex,
-  } = (location.state as LocationState) || {};
-
+export const ValidateStep: React.FC<ValidateStepProps> = ({
+  mnemonic,
+  address: _address,
+  validateIndex: existingIndex,
+  onComplete,
+  onBack,
+}) => {
   const [validateIndex, setValidateIndex] = useState<number | null>(
     existingIndex || null
   );
   const [validateInput, setValidateInput] = useState("");
   const [validateError, setValidateError] = useState("");
-  const [showPasswordSetup, setShowPasswordSetup] = useState(false);
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [passwordError, setPasswordError] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -91,154 +83,86 @@ export const ValidateStep: React.FC = () => {
       }
       setTimeout(() => inputRef.current?.focus(), 100);
     } else {
-      // If no mnemonic in state, redirect to start
-      navigate("/onboarding/warning");
+      // If no mnemonic, go back
+      onBack();
     }
-  }, [mnemonic, navigate, existingIndex]); // Only depend on existingIndex, not validateIndex
+  }, [mnemonic, onBack, existingIndex]); // Only depend on existingIndex, not validateIndex
 
-  const handleValidate = async () => {
+  const handleValidate = () => {
     if (!mnemonic || validateIndex === null) return;
     const words = mnemonic.split(" ");
     if (
       validateInput.trim().toLowerCase() === words[validateIndex].toLowerCase()
     ) {
-      // Show password setup
-      setShowPasswordSetup(true);
+      // Validation successful, proceed to next step
+      onComplete();
     } else {
       setValidateError("Incorrect word. Please try again.");
     }
   };
 
-  const handlePasswordSetup = async () => {
-    if (!password.trim()) {
-      setPasswordError("Please enter a password");
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      setPasswordError("Passwords do not match");
-      return;
-    }
-
-    if (password.length < 8) {
-      setPasswordError("Password must be at least 8 characters");
-      return;
-    }
-
-    try {
-      console.log("Validation successful, starting wallet setup...");
-
-      // Encrypt and store mnemonic
-      console.log("Encrypting and storing mnemonic...");
-      const encryptedMnemonic = await encryptMnemonic(mnemonic, password);
-      await getStorage().set({ encryptedMnemonic });
-      console.log("Mnemonic encrypted and stored successfully");
-
-      // Unlock the app with the mnemonic
-      console.log("Unlocking app...");
-      unlockApp(mnemonic);
-      console.log("App unlocked");
-
-      // Navigate to home (Home component will route to WalletHome)
-      console.log("Navigating to home...");
-      navigate("/home");
-      console.log("Navigation complete");
-    } catch (error) {
-      console.error("Failed to complete wallet setup:", error);
-      setPasswordError("Failed to complete setup. Please try again.");
-    }
-  };
-
   const handleBack = () => {
-    if (showPasswordSetup) {
-      setShowPasswordSetup(false);
-      setPassword("");
-      setConfirmPassword("");
-      setPasswordError("");
-    } else {
-      navigate("/onboarding/generate", {
-        state: { mnemonic, address, validateIndex },
-      });
-    }
+    onBack();
   };
 
   if (!mnemonic || validateIndex === null) {
     return null;
   }
 
-  if (showPasswordSetup) {
-    return (
-      <div className="flex flex-col gap-4 items-center">
-        <div className="text-white text-center mb-2">
-          Set up a password to secure your wallet
-        </div>
-        <Input
-          type="password"
-          className="w-full text-center"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="Enter password (min 8 characters)"
-        />
-        <Input
-          type="password"
-          className="w-full text-center"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          placeholder="Confirm password"
-        />
-        {passwordError && (
-          <div className="text-red-400 text-sm">{passwordError}</div>
-        )}
-        <Button
-          className="w-full border-2 border-white !border-white text-lg"
-          onClick={handlePasswordSetup}
-        >
-          Create Wallet
-        </Button>
-        <Button
-          className="w-full border-2 border-white !border-white text-lg"
-          onClick={handleBack}
-        >
-          Back
-        </Button>
-      </div>
-    );
-  }
-
   return (
-    <div className="flex flex-col gap-4 items-center">
-      <div className="text-white text-center mb-2">
-        Please enter{" "}
-        <span className="font-semibold text-yellow-300">
-          word #{validateIndex + 1}
-        </span>{" "}
-        of your mnemonic to continue.
+    <div className="flex flex-col h-full">
+      <div className="flex-1 flex flex-col items-center justify-center p-6">
+        <div className="w-full max-w-md">
+          <div className="text-center mb-8">
+            <div className="w-20 h-20 mx-auto mb-6 bg-gray-800/80 backdrop-blur-sm rounded-full flex items-center justify-center border border-gray-700">
+              <span className="text-yellow-400 text-2xl">✓</span>
+            </div>
+            <h1 className="text-2xl font-bold text-white mb-4">
+              Verify Your Recovery Phrase
+            </h1>
+            <p className="text-gray-300 text-base">
+              Please enter{" "}
+              <span className="font-semibold text-yellow-400">
+                word #{validateIndex + 1}
+              </span>{" "}
+              of your mnemonic to continue.
+            </p>
+          </div>
+
+          <div className="space-y-6">
+            <div className="space-y-2">
+              <Input
+                ref={inputRef}
+                className="w-full text-center bg-gray-800 text-white placeholder-gray-400 text-lg py-4"
+                value={validateInput}
+                onChange={(e) => setValidateInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleValidate();
+                }}
+                placeholder={`Word #${validateIndex + 1}`}
+              />
+              {validateError && (
+                <div className="text-red-400 text-sm text-center">
+                  {validateError}
+                </div>
+              )}
+            </div>
+
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
+                className="flex-1 text-lg py-4"
+                onClick={handleBack}
+              >
+                Back
+              </Button>
+              <Button className="flex-1 text-lg py-4" onClick={handleValidate}>
+                Validate
+              </Button>
+            </div>
+          </div>
+        </div>
       </div>
-      <Input
-        ref={inputRef}
-        className="w-full text-center"
-        value={validateInput}
-        onChange={(e) => setValidateInput(e.target.value)}
-        onKeyDown={(e) => {
-          if (e.key === "Enter") handleValidate();
-        }}
-        placeholder={`Word #${validateIndex + 1}`}
-      />
-      {validateError && (
-        <div className="text-red-400 text-sm">{validateError}</div>
-      )}
-      <Button
-        className="w-full border-2 border-white !border-white text-lg"
-        onClick={handleValidate}
-      >
-        Validate
-      </Button>
-      <Button
-        className="w-full border-2 border-white !border-white text-lg"
-        onClick={handleBack}
-      >
-        Back
-      </Button>
     </div>
   );
 };

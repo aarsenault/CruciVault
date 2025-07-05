@@ -13,10 +13,15 @@ module.exports = {
           from: { transform: "rotate(0deg)" },
           to: { transform: "rotate(-75deg)" },
         },
+        "fade-in": {
+          "0%": { opacity: "0" },
+          "100%": { opacity: "1" },
+        },
       },
       animation: {
         shake: "shake 0.5s ease-in-out forwards",
         "open-door": "open-door 1s ease-in-out forwards",
+        "fade-in": "fade-in 0.3s ease-in-out forwards",
       },
     },
   },

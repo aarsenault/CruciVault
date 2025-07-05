@@ -84,7 +84,7 @@ const getStorage = () => {
 
 export const WalletHome: React.FC = () => {
   const navigate = useNavigate();
-  const { isLocked, resetActivityTimer, mnemonic } = useSecurity();
+  const { isLocked, resetActivityTimer, mnemonic, lockApp } = useSecurity();
 
   const [address, setAddress] = useState<string | null>(null);
   const [walletData, setWalletData] = useState<WalletData | null>(null);
@@ -106,13 +106,6 @@ export const WalletHome: React.FC = () => {
       try {
         console.log("WalletHome: Starting wallet initialization...");
         setIsLoading(true);
-
-        // Check if app is locked
-        if (isLocked) {
-          console.log("WalletHome: App is locked, navigating to lock screen");
-          navigate("/lock");
-          return;
-        }
 
         // Derive address from mnemonic
         if (!mnemonic) {
@@ -141,7 +134,7 @@ export const WalletHome: React.FC = () => {
     };
 
     initializeWallet();
-  }, [mnemonic, isLocked, resetActivityTimer, navigate, isInitialized]);
+  }, [mnemonic, resetActivityTimer, navigate]);
 
   // Separate useEffect for balance fetching
   useEffect(() => {
@@ -377,43 +370,6 @@ export const WalletHome: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full">
-      <style jsx>{`
-        .nav-button {
-          outline: none !important;
-          border: none !important;
-          box-shadow: none !important;
-        }
-        .nav-button:focus-visible {
-          outline: none !important;
-          border: 2px solid #fbbf24 !important;
-          box-shadow: 0 0 0 2px #fbbf24 !important;
-        }
-        .nav-button:focus {
-          outline: none !important;
-          border: 2px solid #fbbf24 !important;
-          box-shadow: 0 0 0 2px #fbbf24 !important;
-        }
-        .nav-button:focus-visible:not(:focus-visible) {
-          outline: none !important;
-          border: none !important;
-          box-shadow: none !important;
-        }
-        .nav-button:focus:not(:focus) {
-          outline: none !important;
-          border: none !important;
-          box-shadow: none !important;
-        }
-        .nav-button:focus-within {
-          outline: none !important;
-          border: none !important;
-          box-shadow: none !important;
-        }
-        .nav-button:focus-within:focus-visible {
-          outline: none !important;
-          border: 2px solid #fbbf24 !important;
-          box-shadow: 0 0 0 2px #fbbf24 !important;
-        }
-      `}</style>
       {/* Navigation Menu */}
       <TooltipProvider>
         <div className="w-full">
@@ -423,7 +379,7 @@ export const WalletHome: React.FC = () => {
                 <Button
                   variant="ghost"
                   onClick={() => navigate("/home")}
-                  className="nav-button flex-1 h-12 bg-gray-800 hover:bg-gray-700 hover:text-yellow-400 text-white border-0 rounded-none transition-colors"
+                  className="nav-button flex-1 h-12 bg-gray-800 hover:bg-gray-700 hover:text-yellow-400 text-white border-0 transition-colors"
                 >
                   <HomeIcon className="w-8 h-8" />
                 </Button>
@@ -438,7 +394,7 @@ export const WalletHome: React.FC = () => {
                 <Button
                   variant="ghost"
                   onClick={() => navigate("/send")}
-                  className="nav-button flex-1 h-12 bg-gray-800 hover:bg-gray-700 hover:text-yellow-400 text-white border-0 rounded-none transition-colors"
+                  className="nav-button flex-1 h-12 bg-gray-800 hover:bg-gray-700 hover:text-yellow-400 text-white border-0 transition-colors"
                 >
                   <SendIcon className="w-8 h-8" />
                 </Button>
@@ -453,7 +409,7 @@ export const WalletHome: React.FC = () => {
                 <Button
                   variant="ghost"
                   onClick={() => navigate("/transactions")}
-                  className="nav-button flex-1 h-12 bg-gray-800 hover:bg-gray-700 hover:text-yellow-400 text-white border-0 rounded-none transition-colors"
+                  className="nav-button flex-1 h-12 bg-gray-800 hover:bg-gray-700 hover:text-yellow-400 text-white border-0 transition-colors"
                 >
                   <ListIcon className="w-8 h-8" />
                 </Button>
@@ -468,7 +424,7 @@ export const WalletHome: React.FC = () => {
                 <Button
                   variant="ghost"
                   onClick={() => navigate("/settings")}
-                  className="nav-button flex-1 h-12 bg-gray-800 hover:bg-gray-700 hover:text-yellow-400 text-white border-0 rounded-none transition-colors"
+                  className="nav-button flex-1 h-12 bg-gray-800 hover:bg-gray-700 hover:text-yellow-400 text-white border-0 transition-colors"
                 >
                   <SettingsIcon className="w-8 h-8" />
                 </Button>
@@ -482,8 +438,8 @@ export const WalletHome: React.FC = () => {
               <TooltipTrigger asChild>
                 <Button
                   variant="ghost"
-                  onClick={() => navigate("/lock")}
-                  className="nav-button flex-1 h-12 bg-gray-800 hover:bg-gray-700 hover:text-yellow-400 text-white border-0 rounded-none transition-colors"
+                  onClick={lockApp}
+                  className="nav-button flex-1 h-12 bg-gray-800 hover:bg-gray-700 hover:text-yellow-400 text-white border-0 transition-colors"
                 >
                   <LockIcon className="w-8 h-8" />
                 </Button>

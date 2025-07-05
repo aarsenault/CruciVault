@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Button } from "components/ui/button";
 import { Input } from "components/ui/input";
-import { useNavigate } from "react-router-dom";
 import { useSecurity } from "contexts/SecurityContext";
 import { decryptMnemonic } from "lib/crypto";
 import { LockIcon } from "components/icons";
@@ -59,18 +58,10 @@ const getStorage = () => {
 };
 
 export const Lock: React.FC = () => {
-  const navigate = useNavigate();
-  const { isLocked, unlockApp } = useSecurity();
+  const { unlockApp } = useSecurity();
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    // If not locked, redirect to home
-    if (!isLocked) {
-      navigate("/home");
-    }
-  }, [isLocked, navigate]);
 
   const handleUnlock = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -100,8 +91,7 @@ export const Lock: React.FC = () => {
       // Unlock the app with the decrypted mnemonic
       unlockApp(mnemonic);
 
-      console.log("Lock: Unlock successful, navigating to home");
-      navigate("/home");
+      console.log("Lock: Unlock successful");
     } catch (error) {
       console.error("Lock: Unlock failed:", error);
       setError("Incorrect password");
@@ -136,7 +126,7 @@ export const Lock: React.FC = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter password"
-                className="w-full text-lg py-4"
+                className="w-full text-lg py-4 bg-gray-800 text-white placeholder-gray-400"
                 disabled={isLoading}
               />
             </div>

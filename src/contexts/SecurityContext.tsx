@@ -58,7 +58,17 @@ const getStorage = () => {
         const result: any = {};
         keys.forEach((key) => {
           const val = localStorage.getItem(key);
-          result[key] = val ? JSON.parse(val) : undefined;
+          if (val) {
+            try {
+              // Try to parse as JSON first
+              result[key] = JSON.parse(val);
+            } catch {
+              // If parsing fails, use the raw value
+              result[key] = val;
+            }
+          } else {
+            result[key] = undefined;
+          }
         });
         return result;
       },
@@ -162,17 +172,7 @@ export const SecurityProvider: React.FC<SecurityProviderProps> = ({
       clearTimeout(lockTimer);
       setLockTimer(null);
     }
-
-    // Navigate to lock screen if not already there
-    if (
-      !location.pathname.startsWith("/onboarding") &&
-      location.pathname !== "/lock"
-    ) {
-      const address = location.state?.address;
-      if (address) {
-        navigate("/lock", { state: { address } });
-      }
-    }
+    // Let AppRouter handle navigation based on lock state
   };
 
   const unlockApp = (newMnemonic: string) => {

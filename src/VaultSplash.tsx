@@ -27,6 +27,8 @@ export const VaultSplash: React.FC = () => {
         className="
           mt-4 px-4 py-2 w-56 text-center text-base
           rounded-md focus:outline-none
+          bg-gray-800 text-white placeholder-gray-400
+          border border-gray-600 focus:border-yellow-400
         "
       />
     </div>
