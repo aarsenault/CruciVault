@@ -1,19 +1,65 @@
 # CruciVault
 
-A secure Bittensor wallet extension for Chrome.
+A secure Bittensor wallet browser extension.
 
 ## Features
 
 - Generate and restore Bittensor wallets
 - Secure password protection
-- Send and receive TAO
-- View transaction history
-- Auto-lock functionality
+- Extension auto-locks after a user specified period of inactivity.
+- Send and receive TAO (coming soon)
+- View transaction history (coming soon)
+
+## UI Screenshots
+
+### Onboarding Flow
+#### Welcome Screen
+[Screenshot of the initial welcome screen]
+
+#### Security Warning
+[Screenshot of the security warning step]
+
+#### Wallet Generation
+[Screenshot of the wallet generation step with seed phrase]
+
+#### Seed Phrase Validation
+[Screenshot of the seed phrase validation step]
+
+#### Password Setup
+[Screenshot of the password creation step]
+
+### Main Application
+#### Wallet Home
+[Screenshot of the main wallet home screen with balance and address]
+
+#### Send Transaction
+[Screenshot of the send transaction interface]
+
+#### Transaction History
+[Screenshot of the transaction history view]
+
+#### Settings
+[Screenshot of the settings panel with auto-lock configuration]
+
+### Security
+#### Lock Screen
+[Screenshot of the wallet lock screen with password input]
+
+#### Logout Confirmation
+[Screenshot of the logout confirmation dialog]
 
 ## UI
 
-### Navigation
+### Sidebar vs Popup
 
+This extension loads in a sidebar rather than a popup. This has many benefits:
+ - Allows the user to navigate, click on, and interact with pages without forcing the popup closed. Clicking on links from within the extension does not close the extension and can be read simultaneously.
+ - Allows the user to define the width and side of the browser they prefer
+ - Makes the UI less cramped
+ - Replicates a form factor which could easily be duplicated on a mobile device.
+
+### Navigation
+- **Onboarding Stepper**: The user is guided through the onboarding flow with a custom stepper.
 - **Swipe Navigation**: In the main wallet state, you can navigate between different sections (Home, Send, Transactions, Settings) by swiping left or right on the screen. This provides an intuitive touch-based navigation experience alongside the traditional navigation menu.
 
 ## Security
@@ -21,9 +67,7 @@ A secure Bittensor wallet extension for Chrome.
 ### Locking & Security
 
 - **Auto-lock:** The app automatically locks after a configurable period of inactivity (default: 5 minutes).
-- **Auto-lock Timer Setting:** Users can adjust the auto-lock timer in the Settings panel, ranging from 1 to 60 minutes. This allows customization based on security preferences and usage patterns.
-- **Lock screen:** When locked, the mnemonic is removed from memory and the user must enter their password to unlock.
-- **Password:** On first lock, the user sets a password. On subsequent unlocks, the password is required.
+- **Auto-lock Timer Setting:** Users can adjust the auto-lock timer in the Settings panel. This allows customization based on security preferences and usage patterns.
 - **Mnemonic security:** The mnemonic is never kept in memory when locked, and is only restored after successful unlock.
 - **Manual lock:** The user can lock the app at any time from the navigation bar.
 
@@ -31,98 +75,29 @@ A secure Bittensor wallet extension for Chrome.
 
 - **Fake Display Protection**: When the mnemonic is in "hidden" state, the wallet displays fake text instead of the actual seed phrase. This prevents accidental exposure through browser developer tools, screen captures, or other inspection methods.
 - **Explicit Reveal**: The real seed phrase is only displayed when the user explicitly clicks the reveal button, providing an additional layer of security.
-- **Blur Effect**: Visual blurring is applied to the mnemonic display area when hidden, making it impossible to read even if partially visible.
 
 ### Browser Extension Security
 
 - **Manifest V3**: Built using Chrome's latest extension manifest version with strict Content Security Policy (CSP) for enhanced security.
 - **WASM Support**: Requires `wasm-unsafe-eval` in CSP to support cryptographic operations via WebAssembly for optimal performance and security.
-- **Local Storage**: All sensitive data is stored locally within the extension's secure context.
+- **Chrome API Storage**: All sensitive data is stored locally within the extension's secure context. Less secure settings (wallet labels etc.) are stored in extensions sync settings and can be retrieved if the user logs in via another device.
 
 ### Dependency Security
 
-- **Pinned Package Versions**: All Polkadot cryptographic packages are pinned to exact versions to prevent supply chain attacks and ensure reproducible builds.
-- **Supply Chain Attack Prevention**: By removing version ranges (^), malicious code cannot be introduced through automatic package updates.
+- **Pinned Package Versions**: All Polkadot cryptographic packages are pinned to exact versions to prevent supply chain attacks and ensure reproducible builds. By removing version ranges (^), malicious code cannot be introduced through automatic package updates. This is especially important as we are allowing WASM eval in our csp.
 - **Audit Trail**: Specific versions can be audited and verified, providing transparency about exactly what code is running.
 - **Controlled Updates**: Any future updates to critical cryptographic dependencies require explicit review and approval.
 
-#### Why `wasm-unsafe-eval` is Required
-
-The extension requires `wasm-unsafe-eval` in the Content Security Policy because:
-- **Cryptographic Performance**: WebAssembly provides significantly faster cryptographic operations compared to pure JavaScript
-- **Security Standards**: The Polkadot ecosystem uses WASM for cryptographic functions to meet industry security standards
-- **Limited Alternative**: Pure JavaScript fallbacks are available but significantly slower and may not be suitable for production use
-- **Controlled Environment**: The extension runs in a controlled environment where the WASM code is bundled with the extension itself, not loaded from external sources
-
-**Note**: While `wasm-unsafe-eval` is required, the extension mitigates risks by:
-- Using pinned, audited package versions
-- Running in a controlled extension environment
-- Not loading WASM from external sources
-- Implementing additional security measures like fake mnemonic display
 
 ### Password Strength Requirements
 
-CruciVault uses the industry-standard **zxcvbn** library to measure password strength and enforce security requirements.
+CruciVault uses **zxcvbn** library to measure password strength and enforce security requirements.
 
 #### Strength Levels
-
-Passwords are rated on a 5-point scale:
-- **0 (Very Weak)**: Easily guessable, common patterns
-- **1 (Weak)**: Simple patterns, short length
-- **2 (Acceptable)**: Basic security, but could be stronger
-- **3 (Good)**: Meets minimum security requirements
-- **4 (Strong)**: High security, difficult to crack
-
-#### Requirements
-
 - **Minimum Score**: Passwords must achieve a score of **3 (Good)** or higher
 - **Real-time Feedback**: Strength is evaluated as you type
 - **Detailed Suggestions**: Specific recommendations for improvement
-- **Warning Messages**: Alerts about common weak patterns
-
-#### Creating Strong Passwords
-
-**Do:**
-- Use **12+ characters** minimum
-- Mix **uppercase and lowercase** letters
-- Include **numbers and symbols**
-- Use **random combinations** rather than words
-- Consider **passphrases** (multiple random words)
-- Use a **password manager** for generation
-
-**Don't:**
-- Use personal information (birthdays, names, addresses)
-- Use common patterns (123456, qwerty, password)
-- Use single dictionary words
-- Use keyboard patterns (asdfgh, 1qaz2wsx)
-- Reuse passwords from other accounts
-
-#### Examples
-
-**Weak Passwords:**
-- `password123` (common word + numbers)
-- `123456789` (sequential numbers)
-- `qwerty` (keyboard pattern)
-- `john1985` (name + year)
-
-**Strong Passwords:**
-- `K9#mP$2vN8@xL5` (random characters)
-- `correct horse battery staple` (random passphrase)
-- `Tr0ub4dor&3` (mixed with substitutions)
-- `MyC@t!sC@ll3dFluffy` (personal but complex)
-
-#### Security Benefits
-
-- **Brute Force Protection**: Strong passwords resist automated attacks
-- **Dictionary Attack Resistance**: Avoids common word-based attacks
-- **Pattern Recognition**: Prevents predictable sequences
-- **Entropy Maximization**: Ensures sufficient randomness
-
-### Best Practices
-- **Never share your seed phrase** with anyone or any application
-- **Keep backups** in secure, offline locations as recommended in the [Bittensor documentation](https://docs.learnbittensor.org/keys/handle-seed-phrase)
-- **Use on trusted devices** only, avoiding public or shared computers
-- **Regular updates** ensure you have the latest security patches
+- **Warning Messages**: Alerts about common weak patterns i.e. repeated words or common passwords
 
 ## Getting Started
 
@@ -143,7 +118,7 @@ npm install
 npm run dev
 ```
 
-This will start the Vite dev server. Open the provided local URL in your browser to preview the popup UI.
+This will start the Vite dev server and auto reload when changes are detected. To load them in the extension refresh it from `chrome://extensions`
 
 ### Build for production
 
@@ -159,7 +134,7 @@ The production-ready extension will be output to the `dist/` directory.
 2. Open your browser and go to `chrome://extensions/`.
 3. Enable "Developer mode" (toggle in the top right).
 4. Click "Load unpacked" and select the `dist/` folder in this project.
-5. The CruciVault extension should now appear in your extension list. Click its icon to open the popup.
+5. The CruciVault extension should now appear in your extension list. Pin the icon, and click it to open the extension sidebar.
 
 ### Lint the code
 
@@ -167,57 +142,105 @@ The production-ready extension will be output to the `dist/` directory.
 npm run lint
 ```
 
-## Hot Reloading for Extension Development
 
-This project supports automatic extension reloading in Chrome during development using [crx-hotreload](https://github.com/xpl/crx-hotreload).
 
-### How it works
-- Any time you change your code, the extension will rebuild and automatically reload itself in Chrome—no need to click the reload button manually.
+## Architecture Decisions
 
-### Setup (already configured)
-- `crx-hotreload.js` is included and copied to the build output.
-- The background script imports it for hot reload support.
-
-### Usage
-1. Run the watcher to continuously build to `dist/`:
-   ```bash
-   npm run watch
-   ```
-2. Load the `dist` folder as an unpacked extension in Chrome (`chrome://extensions/`).
-3. When you make changes, the extension will reload itself automatically in Chrome.
-
-If you encounter issues, see the [crx-hotreload documentation](https://github.com/xpl/crx-hotreload) for troubleshooting.
-
-## Project Structure
+### Project Structure
 
 - `src/` — React source code
 - `public/` — Static assets and extension manifest
 - `dist/` — Production build output
 
-## Architecture Decisions
+
 
 ### Routing Architecture
-The application uses React Router for navigation with a clean separation of concerns:
 
-- **Modular Components**: Each onboarding step is a separate component for maintainability
-- **Route-based State**: Uses React Router's location state to pass data between routes
-- **URL-based Navigation**: Users can bookmark or share specific steps
+**Conditional Route Rendering** based on wallet state:
 
-### Navigation & Data Persistence
-The onboarding flow implements intelligent navigation with data preservation:
+- **No Wallet**: Shows onboarding flow at root path `/`
+- **Wallet Locked**: Shows lock screen with all routes redirecting to `/lock`
+- **Wallet Unlocked**: Shows main app routes (`/home`, `/send`, `/transactions`, `/settings`)
+- **Smart Navigation**: Automatic redirection based on wallet state changes
 
-- **Data Persistence**: When going back from validation to generate, the mnemonic is preserved
-- **No Regeneration**: If returning to generate step with existing data, it won't generate a new wallet
-- **Consistent UI**: All back buttons use the same styling and positioning
-- **User Experience**: Users can easily navigate back to see their seed phrase during validation
+### Storage Architecture
 
-### Security Architecture
-Multiple layers of security are implemented throughout the application:
+**Dual Storage Strategy** for security and convenience:
 
-- **Fake Display Protection**: Shows fake text when mnemonic is hidden to prevent inspection attacks
-- **Pinned Dependencies**: Critical cryptographic packages are pinned to exact versions
-- **CSP Compliance**: Proper Content Security Policy configuration for Chrome extensions
-- **State Management**: Sensitive data is passed through secure route state rather than global state
+- **Chrome Storage Local**: Sensitive data (encrypted mnemonics) - device-specific, not synced
+- **Chrome Storage Sync**: Non-sensitive data (wallet labels, settings) - synced across devices
+- **Automatic Separation**: Storage utility automatically routes data based on sensitivity
+
+### Cryptographic Architecture
+
+**Industry-standard encryption** for mnemonic protection:
+
+- **PBKDF2**: Password-based key derivation with 100,000 iterations for brute-force resistance
+- **AES-GCM**: Authenticated encryption for confidentiality and integrity
+- **Random Salt/IV**: Unique salt and initialization vector for each encryption
+- **Base64 Encoding**: Standard encoding for storage compatibility
+
+### Component Architecture
+
+**Modular Design** with clear separation of concerns:
+
+- **Layout Component**: Handles navigation visibility and background effects
+- **AppRouter**: Manages route rendering based on application state
+- **OnboardingStepper**: Multi-step flow with state preservation between steps
+- **Security Components**: Lock screen and security dialogs with consistent UX
+
+### Development Architecture
+
+**TypeScript-first** with modern tooling:
+
+- **Path Aliases**: Clean imports using `@/`, `components/`, `lib/` aliases
+- **Vite Build**: Fast development with hot reload for extension development
+- **Chrome Extension APIs**: Manifest V3 with strict CSP for security
+- **Component Library**: Reusable UI components with consistent styling
+
+### Component Libraries & Dependencies
+
+**Modern UI Stack** built for security and user experience:
+
+- **shadcn/ui**: Primary component library with "new-york" style variant, providing Button, Input, Dialog, Card, Tooltip, Progress, Stepper, and Navigation Menu components
+- **Radix UI**: Headless UI primitives for accessibility (Dialog, Navigation Menu, Progress, Slot, Tooltip)
+- **Lucide React**: Modern icon library used throughout the application for consistent visual language
+- **Tailwind CSS v4**: Utility-first CSS framework with custom neutral theme and CSS variables
+
+**Blockchain & Cryptography**:
+
+- **Polkadot Ecosystem**: `@polkadot/api`, `@polkadot/keyring`, `@polkadot/react-identicon`, `@polkadot/util-crypto`, `@polkadot/wasm-crypto` for Bittensor network interaction
+- **Cryptography**: `@scure/bip39`, `bip39`, `zxcvbn` for mnemonic generation and password strength evaluation
+
+**Visual Effects & Development**:
+
+- **Three.js & Vanta**: 3D graphics and animated background effects
+- **React 19.1.0**: Latest React with TypeScript and React Router DOM 7.6.3
+- **Build Tools**: Vite with React plugin, TypeScript 5.8.3, ESLint, PostCSS
+
+## TODO
+
+### Testing & Quality
+
+- **Unit Tests**: Implement comprehensive test suite for components and utilities
+- **ESLint Errors**: Remove remaining ESLint errors and warnings
+
+### Code Quality & Refactoring
+
+- **DRY Principle**: There are examples in the code which for the sake of time have not yet been made DRY (e.g., logout warnings) into reusable components and should not be duplicated as they currently are.
+- **Custom Hooks**: Abstract these areas of common functionality into custom hooks for better reusability
+- **Component Abstraction**: Extract repeated patterns into dedicated components
+
+### Features & Functionality
+
+- **Transaction History**: Complete and wire up transaction history functionality (started but not fully implemented)
+- **Import Wallet**: Create login flow for existing wallet restoration
+- **Send Flow**: Configure and implement the send transaction functionality
+
+### UI/UX Improvements
+
+- **State Change Flashes**: Fix occasional UI flashes that occur during state transitions
+- **Visual Polish**: Improve overall user experience and visual consistency
 
 ## License
 
