@@ -1,7 +1,8 @@
 import React from "react";
-import { Card, CardContent } from "./ui/card";
-import { NetBackground } from "./NetBackground";
+import { Card, CardContent } from "components/ui/card";
+import { NetBackground } from "components/NetBackground";
 import { useNavigate, useLocation } from "react-router-dom";
+import { ChevronLeftIcon } from "components/icons";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -49,18 +50,7 @@ export const Layout: React.FC<LayoutProps> = ({
                 className="mr-4 p-2 text-white hover:text-yellow-300 transition-colors"
                 aria-label="Go back"
               >
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="m15 18-6-6 6-6" />
-                </svg>
+                <ChevronLeftIcon />
               </button>
             )}
             <h1 className="text-2xl font-bold text-white">Bittensor Wallet</h1>

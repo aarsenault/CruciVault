@@ -6,16 +6,16 @@ import {
   Navigate,
   useLocation,
 } from "react-router-dom";
-import { Layout } from "./components/Layout";
-import { Home } from "./components/Home";
-import { Send } from "./components/Send";
-import { Transactions } from "./components/Transactions";
-import { Settings } from "./components/Settings";
-import { Lock } from "./components/Lock";
-import { WarningStep } from "./components/onboarding/WarningStep";
-import { GenerateStep } from "./components/onboarding/GenerateStep";
-import { ValidateStep } from "./components/onboarding/ValidateStep";
-import { SecurityProvider } from "./contexts/SecurityContext";
+import { Layout } from "components/Layout";
+import { Home } from "components/Home";
+import { Send } from "components/Send";
+import { Transactions } from "components/Transactions";
+import { Settings } from "components/Settings";
+import { Lock } from "components/Lock";
+import { WarningStep } from "components/onboarding/WarningStep";
+import { GenerateStep } from "components/onboarding/GenerateStep";
+import { ValidateStep } from "components/onboarding/ValidateStep";
+import { SecurityProvider } from "contexts/SecurityContext";
 
 const AppContent: React.FC = () => {
   const location = useLocation();

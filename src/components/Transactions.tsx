@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Card } from "./ui/card";
+import { Card } from "components/ui/card";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   NavigationMenu,
@@ -7,7 +7,7 @@ import {
   NavigationMenuLink,
   NavigationMenuList,
   navigationMenuTriggerStyle,
-} from "./ui/navigation-menu";
+} from "components/ui/navigation-menu";
 import {
   Home as HomeIcon,
   Send as SendIcon,

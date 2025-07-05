@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { OnboardingHome } from "./OnboardingHome";
-import { WalletHome } from "./WalletHome";
+import { OnboardingHome } from "components/OnboardingHome";
+import { WalletHome } from "components/WalletHome";
 
 declare global {
   interface Window {

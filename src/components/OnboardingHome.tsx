@@ -1,6 +1,7 @@
 import React from "react";
-import { Button } from "./ui/button";
+import { Button } from "components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { LayersIcon, DollarSignIcon, DownloadIcon } from "components/icons";
 
 export const OnboardingHome: React.FC = () => {
   const navigate = useNavigate();
@@ -13,21 +14,7 @@ export const OnboardingHome: React.FC = () => {
       <div className="flex-1 flex flex-col items-center justify-center p-6 relative z-10">
         <div className="text-center mb-8">
           <div className="w-20 h-20 mx-auto mb-6 bg-gray-800/80 backdrop-blur-sm rounded-full flex items-center justify-center border border-gray-700">
-            <svg
-              width="32"
-              height="32"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="text-yellow-400"
-            >
-              <path d="M12 2L2 7l10 5 10-5-10-5z" />
-              <path d="M2 17l10 5 10-5" />
-              <path d="M2 12l10 5 10-5" />
-            </svg>
+            <LayersIcon className="text-yellow-400" />
           </div>
           <h1 className="text-3xl font-bold text-white mb-4 drop-shadow-lg">
             Welcome to Tao Wallet
@@ -43,19 +30,7 @@ export const OnboardingHome: React.FC = () => {
             onClick={() => navigate("/onboarding/warning")}
             className="w-full border-2 border-yellow-400 !border-yellow-400 text-yellow-400 hover:bg-yellow-400 hover:text-black text-lg py-4 shadow-lg backdrop-blur-sm"
           >
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="mr-2"
-            >
-              <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-            </svg>
+            <DollarSignIcon className="mr-2" />
             Generate New Wallet
           </Button>
 
@@ -63,21 +38,7 @@ export const OnboardingHome: React.FC = () => {
             onClick={() => navigate("/onboarding/warning")}
             className="w-full border-2 border-white !border-white text-white hover:bg-white hover:text-black text-lg py-4 shadow-lg backdrop-blur-sm"
           >
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="mr-2"
-            >
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-              <polyline points="7,10 12,15 17,10" />
-              <line x1="12" y1="15" x2="12" y2="3" />
-            </svg>
+            <DownloadIcon className="mr-2" />
             Import Existing Wallet
           </Button>
         </div>

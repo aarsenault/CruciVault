@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Button } from "../ui/button";
+import { Button } from "components/ui/button";
 import { useNavigate } from "react-router-dom";
 
 export const WarningStep: React.FC = () => {

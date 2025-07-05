@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Button } from "../ui/button";
-import { Input } from "../ui/input";
+import { Button } from "components/ui/button";
+import { Input } from "components/ui/input";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useSecurity } from "../../contexts/SecurityContext";
-import { encryptMnemonic } from "../../lib/crypto";
+import { useSecurity } from "contexts/SecurityContext";
+import { encryptMnemonic } from "lib/crypto";
 
 interface LocationState {
   mnemonic: string;

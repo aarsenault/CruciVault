@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { Button } from "./ui/button";
+import { Button } from "components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { getTaoBalance, getAddressFromMnemonic } from "../lib/bittensor";
-import { Card } from "./ui/card";
-import { Input } from "./ui/input";
+import { getTaoBalance, getAddressFromMnemonic } from "lib/bittensor";
+import { Card } from "components/ui/card";
+import { Input } from "components/ui/input";
 import Identicon from "@polkadot/react-identicon";
 import {
   Dialog,
@@ -12,14 +12,13 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "./ui/dialog";
+} from "components/ui/dialog";
 import {
-  NavigationMenu,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-  navigationMenuTriggerStyle,
-} from "./ui/navigation-menu";
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "components/ui/tooltip";
 import {
   Home as HomeIcon,
   Send as SendIcon,
@@ -27,7 +26,8 @@ import {
   Settings as SettingsIcon,
   Lock as LockIcon,
 } from "lucide-react";
-import { useSecurity } from "../contexts/SecurityContext";
+import { useSecurity } from "contexts/SecurityContext";
+import { EditIcon } from "components/icons";
 
 interface WalletData {
   address: string;
@@ -134,7 +134,6 @@ export const WalletHome: React.FC = () => {
         setIsLoading(false);
         setIsInitialized(true);
         console.log("WalletHome: Initialization complete");
-
       } catch (error) {
         console.error("WalletHome: Failed to initialize wallet:", error);
         setIsLoading(false);
@@ -379,62 +378,91 @@ export const WalletHome: React.FC = () => {
   return (
     <div className="flex flex-col h-full">
       {/* Navigation Menu */}
-      <div className="p-4 pb-2">
-        <NavigationMenu className="w-full">
-          <NavigationMenuList className="w-full justify-between">
-            <NavigationMenuItem>
-              <NavigationMenuLink
-                className={navigationMenuTriggerStyle()}
-                onClick={() => navigate("/home")}
-              >
-                <span className="flex items-center gap-1">
-                  <HomeIcon className="w-4 h-4" /> Home
-                </span>
-              </NavigationMenuLink>
-            </NavigationMenuItem>
-            <NavigationMenuItem>
-              <NavigationMenuLink
-                className={navigationMenuTriggerStyle()}
-                onClick={() => navigate("/send")}
-              >
-                <span className="flex items-center gap-1">
-                  <SendIcon className="w-4 h-4" /> Send
-                </span>
-              </NavigationMenuLink>
-            </NavigationMenuItem>
-            <NavigationMenuItem>
-              <NavigationMenuLink
-                className={navigationMenuTriggerStyle()}
-                onClick={() => navigate("/transactions")}
-              >
-                <span className="flex items-center gap-1">
-                  <ListIcon className="w-4 h-4" /> Transactions
-                </span>
-              </NavigationMenuLink>
-            </NavigationMenuItem>
-            <NavigationMenuItem>
-              <NavigationMenuLink
-                className={navigationMenuTriggerStyle()}
-                onClick={() => navigate("/settings")}
-              >
-                <span className="flex items-center gap-1">
-                  <SettingsIcon className="w-4 h-4" /> Settings
-                </span>
-              </NavigationMenuLink>
-            </NavigationMenuItem>
-            <NavigationMenuItem>
-              <NavigationMenuLink
-                className={navigationMenuTriggerStyle()}
-                onClick={() => navigate("/lock")}
-              >
-                <span className="flex items-center gap-1">
-                  <LockIcon className="w-4 h-4" /> Lock
-                </span>
-              </NavigationMenuLink>
-            </NavigationMenuItem>
-          </NavigationMenuList>
-        </NavigationMenu>
-      </div>
+      <TooltipProvider>
+        <div className="p-4 pb-2">
+          <div className="flex justify-between items-center">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => navigate("/home")}
+                  className="h-8 w-8 p-0 hover:bg-gray-800"
+                >
+                  <HomeIcon className="w-4 h-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Home</p>
+              </TooltipContent>
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => navigate("/send")}
+                  className="h-8 w-8 p-0 hover:bg-gray-800"
+                >
+                  <SendIcon className="w-4 h-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Send</p>
+              </TooltipContent>
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => navigate("/transactions")}
+                  className="h-8 w-8 p-0 hover:bg-gray-800"
+                >
+                  <ListIcon className="w-4 h-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Transactions</p>
+              </TooltipContent>
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => navigate("/settings")}
+                  className="h-8 w-8 p-0 hover:bg-gray-800"
+                >
+                  <SettingsIcon className="w-4 h-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Settings</p>
+              </TooltipContent>
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => navigate("/lock")}
+                  className="h-8 w-8 p-0 hover:bg-gray-800"
+                >
+                  <LockIcon className="w-4 h-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Lock</p>
+              </TooltipContent>
+            </Tooltip>
+          </div>
+        </div>
+      </TooltipProvider>
 
       {/* Wallet Info Card - Takes up most of the space */}
       <div className="flex-1 px-4 pb-4">
@@ -459,19 +487,7 @@ export const WalletHome: React.FC = () => {
                     variant="ghost"
                     className="text-gray-400 hover:text-white"
                   >
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M12 20h9" />
-                      <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
-                    </svg>
+                    <EditIcon />
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="bg-gray-900 border-gray-700">
