@@ -377,86 +377,118 @@ export const WalletHome: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full">
+      <style jsx>{`
+        .nav-button {
+          outline: none !important;
+          border: none !important;
+          box-shadow: none !important;
+        }
+        .nav-button:focus-visible {
+          outline: none !important;
+          border: 2px solid #fbbf24 !important;
+          box-shadow: 0 0 0 2px #fbbf24 !important;
+        }
+        .nav-button:focus {
+          outline: none !important;
+          border: 2px solid #fbbf24 !important;
+          box-shadow: 0 0 0 2px #fbbf24 !important;
+        }
+        .nav-button:focus-visible:not(:focus-visible) {
+          outline: none !important;
+          border: none !important;
+          box-shadow: none !important;
+        }
+        .nav-button:focus:not(:focus) {
+          outline: none !important;
+          border: none !important;
+          box-shadow: none !important;
+        }
+        .nav-button:focus-within {
+          outline: none !important;
+          border: none !important;
+          box-shadow: none !important;
+        }
+        .nav-button:focus-within:focus-visible {
+          outline: none !important;
+          border: 2px solid #fbbf24 !important;
+          box-shadow: 0 0 0 2px #fbbf24 !important;
+        }
+      `}</style>
       {/* Navigation Menu */}
       <TooltipProvider>
-        <div className="p-4 pb-2">
-          <div className="flex justify-between items-center">
-            <Tooltip>
+        <div className="w-full">
+          <div className="flex w-full">
+            <Tooltip delayDuration={1500}>
               <TooltipTrigger asChild>
                 <Button
                   variant="ghost"
-                  size="sm"
                   onClick={() => navigate("/home")}
-                  className="h-8 w-8 p-0 hover:bg-gray-800"
+                  className="nav-button flex-1 h-12 bg-gray-800 hover:bg-gray-700 hover:text-yellow-400 text-white border-0 rounded-none transition-colors"
                 >
-                  <HomeIcon className="w-4 h-4" />
+                  <HomeIcon className="w-8 h-8" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent>
+              <TooltipContent side="bottom">
                 <p>Home</p>
               </TooltipContent>
             </Tooltip>
 
-            <Tooltip>
+            <Tooltip delayDuration={1500}>
               <TooltipTrigger asChild>
                 <Button
                   variant="ghost"
-                  size="sm"
                   onClick={() => navigate("/send")}
-                  className="h-8 w-8 p-0 hover:bg-gray-800"
+                  className="nav-button flex-1 h-12 bg-gray-800 hover:bg-gray-700 hover:text-yellow-400 text-white border-0 rounded-none transition-colors"
                 >
-                  <SendIcon className="w-4 h-4" />
+                  <SendIcon className="w-8 h-8" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent>
+              <TooltipContent side="bottom">
                 <p>Send</p>
               </TooltipContent>
             </Tooltip>
 
-            <Tooltip>
+            <Tooltip delayDuration={1500}>
               <TooltipTrigger asChild>
                 <Button
                   variant="ghost"
-                  size="sm"
                   onClick={() => navigate("/transactions")}
-                  className="h-8 w-8 p-0 hover:bg-gray-800"
+                  className="nav-button flex-1 h-12 bg-gray-800 hover:bg-gray-700 hover:text-yellow-400 text-white border-0 rounded-none transition-colors"
                 >
-                  <ListIcon className="w-4 h-4" />
+                  <ListIcon className="w-8 h-8" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent>
+              <TooltipContent side="bottom">
                 <p>Transactions</p>
               </TooltipContent>
             </Tooltip>
 
-            <Tooltip>
+            <Tooltip delayDuration={1500}>
               <TooltipTrigger asChild>
                 <Button
                   variant="ghost"
-                  size="sm"
                   onClick={() => navigate("/settings")}
-                  className="h-8 w-8 p-0 hover:bg-gray-800"
+                  className="nav-button flex-1 h-12 bg-gray-800 hover:bg-gray-700 hover:text-yellow-400 text-white border-0 rounded-none transition-colors"
                 >
-                  <SettingsIcon className="w-4 h-4" />
+                  <SettingsIcon className="w-8 h-8" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent>
+              <TooltipContent side="bottom">
                 <p>Settings</p>
               </TooltipContent>
             </Tooltip>
 
-            <Tooltip>
+            <Tooltip delayDuration={1500}>
               <TooltipTrigger asChild>
                 <Button
                   variant="ghost"
-                  size="sm"
                   onClick={() => navigate("/lock")}
-                  className="h-8 w-8 p-0 hover:bg-gray-800"
+                  className="nav-button flex-1 h-12 bg-gray-800 hover:bg-gray-700 hover:text-yellow-400 text-white border-0 rounded-none transition-colors"
                 >
-                  <LockIcon className="w-4 h-4" />
+                  <LockIcon className="w-8 h-8" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent>
+              <TooltipContent side="bottom">
                 <p>Lock</p>
               </TooltipContent>
             </Tooltip>

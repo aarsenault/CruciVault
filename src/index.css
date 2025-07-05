@@ -91,6 +91,14 @@ button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
+/* Override for navigation buttons */
+.nav-button:focus,
+.nav-button:focus-visible {
+  outline: none !important;
+  border: 2px solid #fbbf24 !important;
+  box-shadow: 0 0 0 2px #fbbf24 !important;
+}
+
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;
