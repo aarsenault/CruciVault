@@ -12,6 +12,10 @@ A secure Bittensor wallet browser extension.
 
 ## UI Walkthrough
 
+### Sidebar Benefits vs Popup
+
+![crucivault_sidebar](https://github.com/user-attachments/assets/769e97b7-b2a1-4de0-9aee-169bb7d496a2)
+
 ### Onboarding Flow
 
 #### Welcome Screen
