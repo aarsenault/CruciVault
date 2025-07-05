@@ -23,38 +23,7 @@ declare global {
   }
 }
 
-// Helper to get storage (sync in extension, localStorage in dev)
-const getStorage = () => {
-  if (window.chrome?.storage?.sync) {
-    return {
-      get: (keys: string[]) =>
-        new Promise<any>((resolve) =>
-          window.chrome!.storage!.sync!.get(keys, resolve)
-        ),
-      set: (data: any) =>
-        new Promise<void>((resolve) =>
-          window.chrome!.storage!.sync!.set(data, resolve)
-        ),
-    };
-  } else {
-    // Fallback for dev: use localStorage
-    return {
-      get: async (keys: string[]) => {
-        const result: any = {};
-        keys.forEach((key) => {
-          const val = localStorage.getItem(key);
-          result[key] = val ? JSON.parse(val) : undefined;
-        });
-        return result;
-      },
-      set: async (data: any) => {
-        Object.entries(data).forEach(([key, value]) => {
-          localStorage.setItem(key, JSON.stringify(value));
-        });
-      },
-    };
-  }
-};
+
 
 export const ValidateStep: React.FC<ValidateStepProps> = ({
   mnemonic,

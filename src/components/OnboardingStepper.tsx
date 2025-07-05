@@ -56,16 +56,19 @@ export const OnboardingStepper: React.FC = () => {
     setCurrentStep(step);
   };
 
-  const completeOnboarding = async () => {
+  const completeOnboarding = async (password?: string) => {
     console.log("completeOnboarding: starting");
     setIsCompleting(true);
     try {
+      // Use provided password or fall back to state
+      const finalPassword = password || onboardingState.password;
+
       // Encrypt and store the mnemonic
-      if (onboardingState.mnemonic && onboardingState.password) {
+      if (onboardingState.mnemonic && finalPassword) {
         console.log("completeOnboarding: encrypting mnemonic");
         const encryptedMnemonic = await encryptMnemonic(
           onboardingState.mnemonic,
-          onboardingState.password
+          finalPassword!
         );
 
         console.log("completeOnboarding: storing encrypted mnemonic");
@@ -83,25 +86,31 @@ export const OnboardingStepper: React.FC = () => {
         }
         console.log("completeOnboarding: mnemonic stored successfully");
 
+        // Wait a moment for storage to be fully written
+        await new Promise((resolve) => setTimeout(resolve, 200));
+
         console.log("completeOnboarding: unlocking app");
         unlockApp(onboardingState.mnemonic);
+
+        console.log("completeOnboarding: triggering wallet detection");
+        // Dispatch a custom event to notify AppRouter that wallet was created
+        window.dispatchEvent(new CustomEvent("walletCreated"));
+        console.log("completeOnboarding: wallet creation event dispatched");
+
+        // Additional retry to ensure AppRouter picks up the change
+        setTimeout(() => {
+          console.log(
+            "completeOnboarding: dispatching second walletCreated event"
+          );
+          window.dispatchEvent(new CustomEvent("walletCreated"));
+        }, 500);
       } else {
         console.log("completeOnboarding: missing mnemonic or password", {
           hasMnemonic: !!onboardingState.mnemonic,
           hasPassword: !!onboardingState.password,
         });
+        throw new Error("Missing mnemonic or password");
       }
-
-      console.log("completeOnboarding: triggering wallet detection");
-      // Dispatch a custom event to notify AppRouter that wallet was created
-      // Add a small delay to ensure storage is fully written
-      setTimeout(() => {
-        console.log("completeOnboarding: dispatching walletCreated event");
-        window.dispatchEvent(new CustomEvent("walletCreated"));
-        console.log(
-          "completeOnboarding: wallet creation event dispatched, waiting for AppRouter to handle navigation"
-        );
-      }, 100);
 
       // Let AppRouter handle navigation after it detects the wallet
       // Don't navigate here - let the AppRouter re-render with the main app routes
@@ -226,9 +235,20 @@ export const OnboardingStepper: React.FC = () => {
           <PasswordStep
             onNext={async (password) => {
               console.log("PasswordStep: onNext called with password");
-              setOnboardingState((prev) => ({ ...prev, password }));
-              console.log("PasswordStep: calling completeOnboarding");
-              await completeOnboarding();
+              setOnboardingState((prev) => {
+                const newState = { ...prev, password };
+                console.log(
+                  "PasswordStep: Updated onboarding state:",
+                  newState
+                );
+                return newState;
+              });
+
+              // Pass password directly to completeOnboarding
+              console.log(
+                "PasswordStep: calling completeOnboarding with password"
+              );
+              await completeOnboarding(password);
             }}
           />
         );
@@ -244,14 +264,11 @@ export const OnboardingStepper: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-full relative">
-      {/* Blurred background overlay - always present to prevent flashing */}
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-md"></div>
-
+    <div className="flex flex-col h-full">
       <div className="flex-1 relative z-10">{renderCurrentStep()}</div>
       {/* Show stepper at bottom for all steps except home */}
       {currentStep !== "home" && (
-        <div className="p-4 border-t border-gray-700 relative z-10">
+        <div className="p-4 relative z-10">
           <Stepper steps={getStepperSteps()} />
         </div>
       )}

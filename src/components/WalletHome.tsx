@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { Button } from "components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { getTaoBalance, getAddressFromMnemonic } from "lib/bittensor";
-import { Card } from "components/ui/card";
 import { Input } from "components/ui/input";
 import Identicon from "@polkadot/react-identicon";
 import {
@@ -27,7 +26,7 @@ import {
   Lock as LockIcon,
 } from "lucide-react";
 import { useSecurity } from "contexts/SecurityContext";
-import { EditIcon } from "components/icons";
+import { EditIcon, CopyIcon } from "components/icons";
 
 interface WalletData {
   address: string;
@@ -84,7 +83,7 @@ const getStorage = () => {
 
 export const WalletHome: React.FC = () => {
   const navigate = useNavigate();
-  const { isLocked, resetActivityTimer, mnemonic, lockApp } = useSecurity();
+  const { resetActivityTimer, mnemonic, lockApp } = useSecurity();
 
   const [address, setAddress] = useState<string | null>(null);
   const [walletData, setWalletData] = useState<WalletData | null>(null);
@@ -337,16 +336,11 @@ export const WalletHome: React.FC = () => {
   // Show loading state
   if (isLoading) {
     return (
-      <div className="flex flex-col h-full relative">
-        {/* Blurred background overlay */}
-        <div className="absolute inset-0 bg-black/60 backdrop-blur-md"></div>
-
-        <div className="flex flex-col gap-6 items-center justify-center h-full relative z-10">
-          <div className="text-white text-center text-xl drop-shadow-lg">
-            Loading wallet...
-          </div>
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+      <div className="flex flex-col gap-6 items-center justify-center h-full relative z-10">
+        <div className="text-white text-center text-xl drop-shadow-lg">
+          Loading
         </div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
       </div>
     );
   }
@@ -354,16 +348,11 @@ export const WalletHome: React.FC = () => {
   // Show wallet UI if wallet exists but data is loading
   if (!address || !walletData) {
     return (
-      <div className="flex flex-col h-full relative">
-        {/* Blurred background overlay */}
-        <div className="absolute inset-0 bg-black/60 backdrop-blur-md"></div>
-
-        <div className="flex flex-col gap-6 items-center justify-center h-full relative z-10">
-          <div className="text-white text-center text-xl drop-shadow-lg">
-            Loading wallet data...
-          </div>
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+      <div className="flex flex-col gap-6 items-center justify-center h-full relative z-10">
+        <div className="text-white text-center text-xl drop-shadow-lg">
+          Loading wallet data...
         </div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
       </div>
     );
   }
@@ -379,7 +368,7 @@ export const WalletHome: React.FC = () => {
                 <Button
                   variant="ghost"
                   onClick={() => navigate("/home")}
-                  className="nav-button flex-1 h-12 bg-gray-800 hover:bg-gray-700 hover:text-yellow-400 text-white border-0 transition-colors"
+                  className="nav-button flex-1 h-12 bg-gray-800 hover:bg-gray-700 hover:text-yellow-400 text-white border border-white transition-colors"
                 >
                   <HomeIcon className="w-8 h-8" />
                 </Button>
@@ -394,7 +383,7 @@ export const WalletHome: React.FC = () => {
                 <Button
                   variant="ghost"
                   onClick={() => navigate("/send")}
-                  className="nav-button flex-1 h-12 bg-gray-800 hover:bg-gray-700 hover:text-yellow-400 text-white border-0 transition-colors"
+                  className="nav-button flex-1 h-12 bg-gray-800 hover:bg-gray-700 hover:text-yellow-400 text-white border border-white transition-colors"
                 >
                   <SendIcon className="w-8 h-8" />
                 </Button>
@@ -409,7 +398,7 @@ export const WalletHome: React.FC = () => {
                 <Button
                   variant="ghost"
                   onClick={() => navigate("/transactions")}
-                  className="nav-button flex-1 h-12 bg-gray-800 hover:bg-gray-700 hover:text-yellow-400 text-white border-0 transition-colors"
+                  className="nav-button flex-1 h-12 bg-gray-800 hover:bg-gray-700 hover:text-yellow-400 text-white border border-white transition-colors"
                 >
                   <ListIcon className="w-8 h-8" />
                 </Button>
@@ -424,7 +413,7 @@ export const WalletHome: React.FC = () => {
                 <Button
                   variant="ghost"
                   onClick={() => navigate("/settings")}
-                  className="nav-button flex-1 h-12 bg-gray-800 hover:bg-gray-700 hover:text-yellow-400 text-white border-0 transition-colors"
+                  className="nav-button flex-1 h-12 bg-gray-800 hover:bg-gray-700 hover:text-yellow-400 text-white border border-white transition-colors"
                 >
                   <SettingsIcon className="w-8 h-8" />
                 </Button>
@@ -439,7 +428,7 @@ export const WalletHome: React.FC = () => {
                 <Button
                   variant="ghost"
                   onClick={lockApp}
-                  className="nav-button flex-1 h-12 bg-gray-800 hover:bg-gray-700 hover:text-yellow-400 text-white border-0 transition-colors"
+                  className="nav-button flex-1 h-12 bg-gray-800 hover:bg-gray-700 hover:text-yellow-400 text-white border border-white transition-colors"
                 >
                   <LockIcon className="w-8 h-8" />
                 </Button>
@@ -452,9 +441,9 @@ export const WalletHome: React.FC = () => {
         </div>
       </TooltipProvider>
 
-      {/* Wallet Info Card - Takes up most of the space */}
+      {/* Wallet Info - Takes up most of the space */}
       <div className="flex-1 px-4 pb-4">
-        <Card className="h-full p-6 bg-gray-900/80 border-gray-700 flex flex-col">
+        <div className="h-full p-6 flex flex-col">
           <div className="flex items-center gap-4 mb-6">
             {/* Wallet Identicon */}
             <div className="w-16 h-16 rounded-full flex items-center justify-center bg-white/10">
@@ -513,6 +502,7 @@ export const WalletHome: React.FC = () => {
                           variant="outline"
                           className="text-gray-400 hover:text-white"
                         >
+                          <CopyIcon className="mr-1" />
                           {copySuccess ? "Copied!" : "Copy"}
                         </Button>
                       </div>
@@ -548,6 +538,7 @@ export const WalletHome: React.FC = () => {
                 variant="outline"
                 className="text-gray-400 hover:text-white"
               >
+                <CopyIcon className="mr-1" />
                 {copySuccess ? "Copied!" : "Copy"}
               </Button>
             </div>
@@ -568,7 +559,7 @@ export const WalletHome: React.FC = () => {
             </div>
             {renderBalanceHistory()}
           </div>
-        </Card>
+        </div>
       </div>
     </div>
   );

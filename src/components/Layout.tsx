@@ -1,6 +1,7 @@
 import React from "react";
 import { Card, CardContent } from "components/ui/card";
 import { NetBackground } from "components/NetBackground";
+import { BackgroundOverlay } from "components/BackgroundOverlay";
 import { useNavigate, useLocation } from "react-router-dom";
 import { ChevronLeftIcon } from "components/icons";
 
@@ -53,20 +54,30 @@ export const Layout: React.FC<LayoutProps> = ({
                 <ChevronLeftIcon />
               </button>
             )}
-            <h1 className="text-2xl font-bold text-white">Bittensor Wallet</h1>
+            <div className="flex items-center gap-3">
+              <img
+                src="/crucivault.png"
+                alt="CruciVault"
+                className="w-8 h-8 object-contain"
+              />
+              <h1 className="text-2xl font-bold text-white">CruciVault</h1>
+            </div>
           </div>
 
-          {/* Content area - Different layouts for onboarding vs main app */}
           {isMainApp ? (
             // Main app layout - Takes remaining space
-            <div className="flex-1 flex flex-col">{children}</div>
+            <BackgroundOverlay>
+              <div className="flex-1 flex flex-col">{children}</div>
+            </BackgroundOverlay>
           ) : (
             // Onboarding layout - Centered content
-            <div className="flex-1 flex flex-col items-center justify-center">
-              <div className="w-[90%] max-w-md backdrop-blur bg-white/10 rounded-xl p-6 shadow-lg">
-                {children}
+            <BackgroundOverlay>
+              <div className="flex-1 flex flex-col items-center justify-center">
+                <div className="w-[90%] max-w-md backdrop-blur bg-white/10 rounded-xl p-6 shadow-lg">
+                  {children}
+                </div>
               </div>
-            </div>
+            </BackgroundOverlay>
           )}
         </CardContent>
       </Card>

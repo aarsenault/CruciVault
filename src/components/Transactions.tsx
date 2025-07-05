@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { Card } from "components/ui/card";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   NavigationMenu,
@@ -262,7 +261,7 @@ export const Transactions: React.FC = () => {
       </div>
 
       {/* Transactions List */}
-      <Card className="p-6 bg-gray-900/80 border-gray-700">
+      <div className="p-6">
         <h2 className="text-white text-2xl font-bold mb-6">
           Transaction History
         </h2>
@@ -299,7 +298,7 @@ export const Transactions: React.FC = () => {
             ))}
           </div>
         )}
-      </Card>
+      </div>
     </div>
   );
 };

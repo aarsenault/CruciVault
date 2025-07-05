@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Button } from "components/ui/button";
-import { EyeOffIcon, EyeIcon } from "components/icons";
+import { EyeOffIcon, EyeIcon, KeyIcon, CopyIcon } from "components/icons";
 
 interface GenerateStepProps {
   mnemonic: string;
@@ -38,7 +38,7 @@ export const GenerateStep: React.FC<GenerateStepProps> = ({
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
             <div className="w-20 h-20 mx-auto mb-6 bg-gray-800/80 backdrop-blur-sm rounded-full flex items-center justify-center border border-gray-700">
-              <span className="text-yellow-400 text-2xl">🔐</span>
+              <KeyIcon className="text-yellow-400 w-10 h-10" />
             </div>
             <h1 className="text-2xl font-bold text-white mb-4">
               Your Recovery Phrase
@@ -115,6 +115,7 @@ export const GenerateStep: React.FC<GenerateStepProps> = ({
                 onClick={handleCopy}
                 aria-label="Copy mnemonic to clipboard"
               >
+                <CopyIcon className="mr-2" />
                 {copySuccess ? "Copied!" : "Copy"}
               </Button>
               <Button

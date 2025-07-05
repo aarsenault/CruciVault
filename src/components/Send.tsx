@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { Button } from "components/ui/button";
 import { Input } from "components/ui/input";
-import { Card } from "components/ui/card";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   NavigationMenu,
@@ -53,7 +52,9 @@ export const Send: React.FC = () => {
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
       // Navigate back to home after successful send
-              navigate("/home", { state: { mnemonic: location.state?.mnemonic, address } });
+      navigate("/home", {
+        state: { mnemonic: location.state?.mnemonic, address },
+      });
     } catch (err) {
       setError("Failed to send transaction. Please try again.");
     } finally {
@@ -147,7 +148,7 @@ export const Send: React.FC = () => {
       </div>
 
       {/* Send Form */}
-      <Card className="p-6 bg-gray-900/80 border-gray-700">
+      <div className="p-6">
         <h2 className="text-white text-2xl font-bold mb-6">Send TAO</h2>
 
         <div className="space-y-4">
@@ -188,7 +189,7 @@ export const Send: React.FC = () => {
             {isLoading ? "Sending..." : "Send TAO"}
           </Button>
         </div>
-      </Card>
+      </div>
     </div>
   );
 };

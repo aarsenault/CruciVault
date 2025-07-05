@@ -3,9 +3,9 @@ import React, {
   useContext,
   useState,
   useEffect,
+  useMemo,
   type ReactNode,
 } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
 
 interface SecurityContextType {
   isLocked: boolean;
@@ -88,8 +88,6 @@ export const SecurityProvider: React.FC<SecurityProviderProps> = ({
   const [mnemonic, setMnemonic] = useState<string | null>(null);
   const [lockTimer, setLockTimer] = useState<NodeJS.Timeout | null>(null);
   const [lockTimerMinutes, setLockTimerMinutes] = useState(5);
-  const navigate = useNavigate();
-  const location = useLocation();
 
   // Load settings and check wallet state on mount
   useEffect(() => {
@@ -104,8 +102,6 @@ export const SecurityProvider: React.FC<SecurityProviderProps> = ({
         resetActivityTimer();
       }
     };
-
-    // Listen for user activity
     const events = [
       "mousedown",
       "mousemove",
@@ -117,7 +113,6 @@ export const SecurityProvider: React.FC<SecurityProviderProps> = ({
     events.forEach((event) => {
       document.addEventListener(event, resetTimer, true);
     });
-
     return () => {
       events.forEach((event) => {
         document.removeEventListener(event, resetTimer, true);
@@ -129,7 +124,11 @@ export const SecurityProvider: React.FC<SecurityProviderProps> = ({
     try {
       const stored = await getStorage().get(["appSettings"]);
       if (stored.appSettings?.lockTimerMinutes) {
-        setLockTimerMinutes(stored.appSettings.lockTimerMinutes);
+        setLockTimerMinutes((prev) =>
+          prev !== stored.appSettings.lockTimerMinutes
+            ? stored.appSettings.lockTimerMinutes
+            : prev
+        );
       }
     } catch (error) {
       console.error("Failed to load security settings:", error);
@@ -141,33 +140,29 @@ export const SecurityProvider: React.FC<SecurityProviderProps> = ({
       const stored = await getStorage().get(["encryptedMnemonic"]);
       // If no mnemonic exists, the app should not be locked (show wallet setup)
       if (!stored.encryptedMnemonic) {
-        setIsLocked(false);
+        setIsLocked((prev) => (prev !== false ? false : prev));
       }
       // If mnemonic exists, stay locked until user unlocks
     } catch (error) {
       console.error("Failed to check wallet state:", error);
       // On error, assume no wallet exists
-      setIsLocked(false);
+      setIsLocked((prev) => (prev !== false ? false : prev));
     }
   };
 
   const resetActivityTimer = () => {
-    // Clear existing timer
     if (lockTimer) {
       clearTimeout(lockTimer);
     }
-
-    // Set new timer
     const timer = setTimeout(() => {
       lockApp();
     }, lockTimerMinutes * 60 * 1000);
-
     setLockTimer(timer);
   };
 
   const lockApp = () => {
-    setIsLocked(true);
-    setMnemonic(null); // Clear mnemonic from memory
+    setIsLocked((prev) => (prev !== true ? true : prev));
+    setMnemonic((prev) => (prev !== null ? null : prev)); // Clear mnemonic from memory
     if (lockTimer) {
       clearTimeout(lockTimer);
       setLockTimer(null);
@@ -176,8 +171,8 @@ export const SecurityProvider: React.FC<SecurityProviderProps> = ({
   };
 
   const unlockApp = (newMnemonic: string) => {
-    setIsLocked(false);
-    setMnemonic(newMnemonic);
+    setIsLocked((prev) => (prev !== false ? false : prev));
+    setMnemonic((prev) => (prev !== newMnemonic ? newMnemonic : prev));
     resetActivityTimer();
   };
 
@@ -189,18 +184,22 @@ export const SecurityProvider: React.FC<SecurityProviderProps> = ({
   };
 
   const clearMnemonic = () => {
-    setMnemonic(null);
+    setMnemonic((prev) => (prev !== null ? null : prev));
   };
 
-  const value: SecurityContextType = {
-    isLocked,
-    mnemonic,
-    lockApp,
-    unlockApp,
-    getMnemonic,
-    clearMnemonic,
-    resetActivityTimer,
-  };
+  // Memoize context value to prevent unnecessary re-renders
+  const value = useMemo<SecurityContextType>(
+    () => ({
+      isLocked,
+      mnemonic,
+      lockApp,
+      unlockApp,
+      getMnemonic,
+      clearMnemonic,
+      resetActivityTimer,
+    }),
+    [isLocked, mnemonic]
+  );
 
   return (
     <SecurityContext.Provider value={value}>

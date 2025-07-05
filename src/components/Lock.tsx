@@ -3,7 +3,6 @@ import { Button } from "components/ui/button";
 import { Input } from "components/ui/input";
 import { useSecurity } from "contexts/SecurityContext";
 import { decryptMnemonic } from "lib/crypto";
-import { LockIcon } from "components/icons";
 
 declare global {
   interface Window {
@@ -103,13 +102,17 @@ export const Lock: React.FC = () => {
   return (
     <div className="flex flex-col h-full relative">
       {/* Blurred background overlay */}
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-md"></div>
+      <div className="absolute inset-0 backdrop-blur-md"></div>
 
       <div className="flex-1 flex flex-col items-center justify-center p-6 relative z-10">
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
-            <div className="w-20 h-20 mx-auto mb-6 bg-gray-800/80 backdrop-blur-sm rounded-full flex items-center justify-center border border-gray-700">
-              <LockIcon className="text-yellow-400" />
+            <div className="w-20 h-20 mx-auto mb-6 bg-gray-800/80 backdrop-blur-sm rounded-full flex items-center justify-center border border-gray-700 overflow-hidden">
+              <img
+                src="/crucivault.png"
+                alt="CruciVault"
+                className="w-12 h-12 object-contain"
+              />
             </div>
             <h1 className="text-3xl font-bold text-white mb-4 drop-shadow-lg">
               Wallet Locked

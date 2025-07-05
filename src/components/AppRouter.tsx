@@ -1,5 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
+import {
+  Routes,
+  Route,
+  Navigate,
+  useNavigate,
+  useLocation,
+} from "react-router-dom";
 import { OnboardingStepper } from "components/OnboardingStepper";
 import { WalletHome } from "components/WalletHome";
 import { Send } from "components/Send";
@@ -75,29 +81,36 @@ export const AppRouter: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const { isLocked } = useSecurity();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Helper to safely update hasWallet only if changed
+  const updateHasWallet = (value: boolean) => {
+    setHasWallet((prev) => (prev !== value ? value : prev));
+  };
 
   useEffect(() => {
+    let walletCreatedTimeout: NodeJS.Timeout | null = null;
+    let retryTimer: NodeJS.Timeout | null = null;
+    let isUnmounted = false;
+
     const checkWalletSetup = async () => {
       try {
+        if (isUnmounted) return;
         console.log("AppRouter: Checking wallet setup...");
         setIsLoading(true);
-
-        // Check if user has completed onboarding by looking for encrypted mnemonic
         const stored = await getStorage().get(["encryptedMnemonic"]);
         console.log("AppRouter: Storage check result:", stored);
-
         if (!stored.encryptedMnemonic) {
           console.log("AppRouter: No wallet exists, showing onboarding");
-          setHasWallet(false);
+          updateHasWallet(false);
         } else {
           console.log("AppRouter: Wallet exists, showing main app");
-          setHasWallet(true);
+          updateHasWallet(true);
         }
-
         setIsLoading(false);
       } catch (error) {
         console.error("AppRouter: Failed to check wallet setup:", error);
-        setHasWallet(false);
+        updateHasWallet(false);
         setIsLoading(false);
       }
     };
@@ -105,36 +118,27 @@ export const AppRouter: React.FC = () => {
     // Initial check
     checkWalletSetup();
 
-    // Listen for wallet creation events
+    // Listen for wallet creation events (debounced)
     const handleWalletCreated = () => {
-      console.log("AppRouter: Wallet created event received, re-checking...");
-      // Add a small delay to ensure storage is updated
-      setTimeout(() => {
+      if (walletCreatedTimeout) clearTimeout(walletCreatedTimeout);
+      walletCreatedTimeout = setTimeout(() => {
+        console.log("AppRouter: Wallet created event received, re-checking...");
         checkWalletSetup();
-      }, 200);
-
-      // Additional retry attempts to ensure wallet is detected
-      setTimeout(() => {
-        console.log("AppRouter: Second retry after wallet creation...");
-        checkWalletSetup();
-      }, 500);
-
-      setTimeout(() => {
-        console.log("AppRouter: Third retry after wallet creation...");
-        checkWalletSetup();
-      }, 1000);
+      }, 150); // debounce
     };
 
     window.addEventListener("walletCreated", handleWalletCreated);
 
-    // Retry check after a short delay to catch any storage updates
-    const retryTimer = setTimeout(() => {
+    // Single retry after a short delay to catch any storage updates
+    retryTimer = setTimeout(() => {
       console.log("AppRouter: Retrying wallet check...");
       checkWalletSetup();
     }, 1000);
 
     return () => {
-      clearTimeout(retryTimer);
+      isUnmounted = true;
+      if (retryTimer) clearTimeout(retryTimer);
+      if (walletCreatedTimeout) clearTimeout(walletCreatedTimeout);
       window.removeEventListener("walletCreated", handleWalletCreated);
     };
   }, []);
@@ -160,26 +164,32 @@ export const AppRouter: React.FC = () => {
         );
         const stored = await getStorage().get(["encryptedMnemonic"]);
         console.log("AppRouter: Re-check result:", stored);
-
         if (stored.encryptedMnemonic && !hasWallet) {
           console.log(
             "AppRouter: Wallet detected after SecurityContext change, updating state"
           );
-          setHasWallet(true);
+          updateHasWallet(true);
         }
       }
     };
-
     recheckWallet();
   }, [isLocked, isLoading, hasWallet]);
 
-  // Navigate to home when wallet is detected and not locked
+  // Navigate to home when wallet is detected and not locked, but only if not already there
   useEffect(() => {
+    console.log("AppRouter: Navigation effect triggered - hasWallet:", hasWallet, "isLoading:", isLoading, "isLocked:", isLocked, "location.pathname:", location.pathname);
+
     if (hasWallet && !isLoading && !isLocked) {
-      console.log("AppRouter: Wallet detected and unlocked, navigating to home");
-      navigate("/home", { replace: true });
+      // Only navigate to home if we're on the root path or an invalid path
+      // Don't navigate away from valid app routes like /settings, /send, etc.
+      if (location.pathname === "/" || location.pathname === "/onboarding" || location.pathname.startsWith("/onboarding/")) {
+        console.log("AppRouter: Wallet detected and unlocked, navigating to home from:", location.pathname);
+        navigate("/home", { replace: true });
+      } else {
+        console.log("AppRouter: Staying on current path:", location.pathname);
+      }
     }
-  }, [hasWallet, isLoading, isLocked, navigate]);
+  }, [hasWallet, isLoading, isLocked, navigate, location.pathname]);
 
   // Show loading state
   if (isLoading) {

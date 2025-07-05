@@ -1,9 +1,11 @@
 export { ChevronLeftIcon } from "./ChevronLeftIcon";
 export { EditIcon } from "./EditIcon";
 export { LayersIcon } from "./LayersIcon";
-export { DollarSignIcon } from "./DollarSignIcon";
 export { DownloadIcon } from "./DownloadIcon";
 export { LockIcon } from "./LockIcon";
 export { EyeOffIcon } from "./EyeOffIcon";
 export { EyeIcon } from "./EyeIcon";
-export { VaultIcon } from "./VaultIcon";
+export { KeyIcon } from "./KeyIcon";
+export { WarningIcon } from "./WarningIcon";
+export { WalletIcon } from "./WalletIcon";
+export { CopyIcon } from "./CopyIcon";
