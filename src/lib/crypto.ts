@@ -1,3 +1,20 @@
+function bytesToBase64(bytes: Uint8Array): string {
+  let binary = "";
+  for (let i = 0; i < bytes.length; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return btoa(binary);
+}
+
+function base64ToBytes(base64: string): Uint8Array {
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return bytes;
+}
+
 export async function encryptMnemonic(
   mnemonic: string,
   password: string
@@ -26,9 +43,9 @@ export async function encryptMnemonic(
   );
   // Store salt and iv with ciphertext
   return [
-    Buffer.from(salt).toString("base64"),
-    Buffer.from(iv).toString("base64"),
-    Buffer.from(new Uint8Array(ciphertext)).toString("base64"),
+    bytesToBase64(salt),
+    bytesToBase64(iv),
+    bytesToBase64(new Uint8Array(ciphertext)),
   ].join(".");
 }
 
@@ -38,9 +55,9 @@ export async function decryptMnemonic(
 ): Promise<string> {
   const enc = new TextEncoder();
   const [saltB64, ivB64, ctB64] = ciphertext.split(".");
-  const salt = Uint8Array.from(Buffer.from(saltB64, "base64"));
-  const iv = Uint8Array.from(Buffer.from(ivB64, "base64"));
-  const ct = Uint8Array.from(Buffer.from(ctB64, "base64"));
+  const salt = base64ToBytes(saltB64);
+  const iv = base64ToBytes(ivB64);
+  const ct = base64ToBytes(ctB64);
   const keyMaterial = await window.crypto.subtle.importKey(
     "raw",
     enc.encode(password),

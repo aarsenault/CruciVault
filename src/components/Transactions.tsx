@@ -1,0 +1,305 @@
+import React, { useState, useEffect } from "react";
+import { Card } from "./ui/card";
+import { useNavigate, useLocation } from "react-router-dom";
+import {
+  NavigationMenu,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  navigationMenuTriggerStyle,
+} from "./ui/navigation-menu";
+import {
+  Home as HomeIcon,
+  Send as SendIcon,
+  List as ListIcon,
+  Settings as SettingsIcon,
+  Lock as LockIcon,
+} from "lucide-react";
+
+interface LocationState {
+  mnemonic: string;
+  address: string;
+}
+
+interface Transaction {
+  id: string;
+  type: "send" | "receive";
+  amount: string;
+  address: string;
+  timestamp: string;
+  status: "pending" | "confirmed" | "failed";
+}
+
+declare global {
+  interface Window {
+    chrome?: {
+      storage?: {
+        sync?: {
+          get: (keys: string[], cb: (result: any) => void) => void;
+          set: (data: any, cb: () => void) => void;
+        };
+      };
+    };
+  }
+}
+
+// Helper to get storage (sync in extension, localStorage in dev)
+const getStorage = () => {
+  if (window.chrome?.storage?.sync) {
+    return {
+      get: (keys: string[]) =>
+        new Promise<any>((resolve) =>
+          window.chrome!.storage!.sync!.get(keys, resolve)
+        ),
+      set: (data: any) =>
+        new Promise<void>((resolve) =>
+          window.chrome!.storage!.sync!.set(data, resolve)
+        ),
+    };
+  } else {
+    // Fallback for dev: use localStorage
+    return {
+      get: async (keys: string[]) => {
+        const result: any = {};
+        keys.forEach((key) => {
+          const val = localStorage.getItem(key);
+          result[key] = val ? JSON.parse(val) : undefined;
+        });
+        return result;
+      },
+      set: async (data: any) => {
+        Object.entries(data).forEach(([key, value]) => {
+          localStorage.setItem(key, JSON.stringify(value));
+        });
+      },
+    };
+  }
+};
+
+export const Transactions: React.FC = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { address } = (location.state as LocationState) || {};
+
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    if (!address) {
+      navigate("/onboarding/warning");
+      return;
+    }
+
+    // Load transactions from storage
+    loadTransactions();
+  }, [address, navigate]);
+
+  const loadTransactions = async () => {
+    try {
+      const stored = await getStorage().get(["transactions"]);
+      if (stored.transactions && stored.transactions[address]) {
+        setTransactions(stored.transactions[address]);
+      } else {
+        // For now, show some sample transactions
+        const sampleTransactions: Transaction[] = [
+          {
+            id: "1",
+            type: "receive",
+            amount: "10.5",
+            address: "5F...abc123",
+            timestamp: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
+            status: "confirmed",
+          },
+          {
+            id: "2",
+            type: "send",
+            amount: "2.3",
+            address: "5F...def456",
+            timestamp: new Date(Date.now() - 172800000).toISOString(), // 2 days ago
+            status: "confirmed",
+          },
+        ];
+        setTransactions(sampleTransactions);
+
+        // Save sample data
+        const allTransactions = stored.transactions || {};
+        allTransactions[address] = sampleTransactions;
+        await getStorage().set({ transactions: allTransactions });
+      }
+    } catch (error) {
+      console.error("Failed to load transactions:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "confirmed":
+        return "text-green-400";
+      case "pending":
+        return "text-yellow-400";
+      case "failed":
+        return "text-red-400";
+      default:
+        return "text-gray-400";
+    }
+  };
+
+  const getTypeIcon = (type: string) => {
+    return type === "send" ? "↗️" : "↙️";
+  };
+
+  const formatDate = (timestamp: string) => {
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diffInHours = (now.getTime() - date.getTime()) / (1000 * 60 * 60);
+
+    if (diffInHours < 24) {
+      return `${Math.floor(diffInHours)}h ago`;
+    } else if (diffInHours < 168) {
+      // 7 days
+      return `${Math.floor(diffInHours / 24)}d ago`;
+    } else {
+      return date.toLocaleDateString();
+    }
+  };
+
+  if (!address) {
+    navigate("/onboarding/warning");
+    return null;
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col gap-6 items-center">
+        <div className="text-white text-center text-xl">
+          Loading transactions...
+        </div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-6">
+      {/* Navigation Menu */}
+      <div className="p-4 pb-2">
+        <NavigationMenu className="w-full">
+          <NavigationMenuList className="w-full justify-between">
+            <NavigationMenuItem>
+              <NavigationMenuLink
+                className={navigationMenuTriggerStyle()}
+                onClick={() =>
+                  navigate("/home", {
+                    state: { mnemonic: location.state?.mnemonic, address },
+                  })
+                }
+              >
+                <span className="flex items-center gap-1">
+                  <HomeIcon className="w-4 h-4" /> Home
+                </span>
+              </NavigationMenuLink>
+            </NavigationMenuItem>
+            <NavigationMenuItem>
+              <NavigationMenuLink
+                className={navigationMenuTriggerStyle()}
+                onClick={() =>
+                  navigate("/send", {
+                    state: { mnemonic: location.state?.mnemonic, address },
+                  })
+                }
+              >
+                <span className="flex items-center gap-1">
+                  <SendIcon className="w-4 h-4" /> Send
+                </span>
+              </NavigationMenuLink>
+            </NavigationMenuItem>
+            <NavigationMenuItem>
+              <NavigationMenuLink
+                className={navigationMenuTriggerStyle()}
+                onClick={() =>
+                  navigate("/transactions", {
+                    state: { mnemonic: location.state?.mnemonic, address },
+                  })
+                }
+              >
+                <span className="flex items-center gap-1">
+                  <ListIcon className="w-4 h-4" /> Transactions
+                </span>
+              </NavigationMenuLink>
+            </NavigationMenuItem>
+            <NavigationMenuItem>
+              <NavigationMenuLink
+                className={navigationMenuTriggerStyle()}
+                onClick={() =>
+                  navigate("/settings", {
+                    state: { mnemonic: location.state?.mnemonic, address },
+                  })
+                }
+              >
+                <span className="flex items-center gap-1">
+                  <SettingsIcon className="w-4 h-4" /> Settings
+                </span>
+              </NavigationMenuLink>
+            </NavigationMenuItem>
+            <NavigationMenuItem>
+              <NavigationMenuLink
+                className={navigationMenuTriggerStyle()}
+                onClick={() =>
+                  navigate("/lock", {
+                    state: { mnemonic: location.state?.mnemonic, address },
+                  })
+                }
+              >
+                <span className="flex items-center gap-1">
+                  <LockIcon className="w-4 h-4" /> Lock
+                </span>
+              </NavigationMenuLink>
+            </NavigationMenuItem>
+          </NavigationMenuList>
+        </NavigationMenu>
+      </div>
+
+      {/* Transactions List */}
+      <Card className="p-6 bg-gray-900/80 border-gray-700">
+        <h2 className="text-white text-2xl font-bold mb-6">
+          Transaction History
+        </h2>
+
+        {transactions.length === 0 ? (
+          <div className="text-gray-400 text-center py-8">
+            No transactions found
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {transactions.map((tx) => (
+              <div
+                key={tx.id}
+                className="flex items-center justify-between p-4 bg-gray-800/50 rounded-lg border border-gray-700"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="text-2xl">{getTypeIcon(tx.type)}</div>
+                  <div>
+                    <div className="text-white font-medium">
+                      {tx.type === "send" ? "Sent" : "Received"} {tx.amount} TAO
+                    </div>
+                    <div className="text-gray-400 text-sm">{tx.address}</div>
+                    <div className="text-gray-500 text-xs">
+                      {formatDate(tx.timestamp)}
+                    </div>
+                  </div>
+                </div>
+                <div
+                  className={`text-sm font-medium ${getStatusColor(tx.status)}`}
+                >
+                  {tx.status.charAt(0).toUpperCase() + tx.status.slice(1)}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </Card>
+    </div>
+  );
+};

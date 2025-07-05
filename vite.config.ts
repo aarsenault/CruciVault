@@ -18,4 +18,15 @@ export default defineConfig({
       ],
     }),
   ],
+  build: {
+    target: "esnext",
+    rollupOptions: {
+      output: {
+        format: "esm",
+      },
+    },
+  },
+  optimizeDeps: {
+    include: ["@polkadot/util-crypto", "@polkadot/wasm-crypto"],
+  },
 });
