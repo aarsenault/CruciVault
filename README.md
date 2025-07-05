@@ -10,102 +10,45 @@ A secure Bittensor wallet browser extension.
 - Send and receive TAO (coming soon)
 - View transaction history (coming soon)
 
-## UI Screenshots
+## UI Walkthrough
 
 ### Onboarding Flow
-#### Welcome Screen
-<img width="591" alt="image" src="https://github.com/user-attachments/assets/d1c98ca0-33d1-49e6-b7a5-dab37190d486" />
 
+#### Welcome Screen
+<img width="400" alt="Welcome Screen" src="https://github.com/user-attachments/assets/d1c98ca0-33d1-49e6-b7a5-dab37190d486" />
 
 #### Security Warning
-<img width="579" alt="image" src="https://github.com/user-attachments/assets/3f93b6fe-8ec6-473f-afa8-9b325c2ab9d3" />
-
+<img width="400" alt="Security Warning" src="https://github.com/user-attachments/assets/3f93b6fe-8ec6-473f-afa8-9b325c2ab9d3" />
 
 #### Seed Phrase Generation
-<img width="580" alt="image" src="https://github.com/user-attachments/assets/19914dc7-6b70-4010-a8c3-4229129bdd65" />
-
+<img width="400" alt="Seed Phrase Generation" src="https://github.com/user-attachments/assets/19914dc7-6b70-4010-a8c3-4229129bdd65" />
 
 #### Seed Phrase Validation
-<img width="578" alt="image" src="https://github.com/user-attachments/assets/3f3e1020-75a0-4714-bedf-c88fabbfdbd8" />
-
+<img width="400" alt="Seed Phrase Validation" src="https://github.com/user-attachments/assets/3f3e1020-75a0-4714-bedf-c88fabbfdbd8" />
 
 #### Password Setup
-<img width="580" alt="image" src="https://github.com/user-attachments/assets/9b30cf58-2075-47df-8ab0-47346eb8394c" />
-<img width="579" alt="image" src="https://github.com/user-attachments/assets/c9e46255-dc32-4440-8983-771052c01444" />
-<img width="581" alt="image" src="https://github.com/user-attachments/assets/17d268ea-444a-4c32-a97a-4cfe840a403e" />
-<img width="578" alt="image" src="https://github.com/user-attachments/assets/1d359cb4-0c47-4dff-8bc4-0b9c0189b53a" />
-
-
-
-
+<div style="display: flex; gap: 10px; flex-wrap: wrap; margin: 10px 0;">
+  <img width="300" alt="Password Setup - Step 1" src="https://github.com/user-attachments/assets/9b30cf58-2075-47df-8ab0-47346eb8394c" />
+  <img width="300" alt="Password Setup - Step 2" src="https://github.com/user-attachments/assets/c9e46255-dc32-4440-8983-771052c01444" />
+  <img width="300" alt="Password Setup - Step 3" src="https://github.com/user-attachments/assets/17d268ea-444a-4c32-a97a-4cfe840a403e" />
+  <img width="300" alt="Password Setup - Step 4" src="https://github.com/user-attachments/assets/1d359cb4-0c47-4dff-8bc4-0b9c0189b53a" />
+</div>
 
 ### Main Application
+
 #### Wallet Home
-<img width="580" alt="image" src="https://github.com/user-attachments/assets/b987423f-1ce9-4c5d-971e-a183016a43e3" />
+<img width="400" alt="Wallet Home" src="https://github.com/user-attachments/assets/b987423f-1ce9-4c5d-971e-a183016a43e3" />
 
 #### Settings
-<img width="585" alt="image" src="https://github.com/user-attachments/assets/3075a719-3913-427e-97c0-3cda028572e2" />
-
+<img width="400" alt="Settings" src="https://github.com/user-attachments/assets/3075a719-3913-427e-97c0-3cda028572e2" />
 
 ### Security
-#### Lock Screen
-<img width="578" alt="image" src="https://github.com/user-attachments/assets/3c2b0ced-6efd-466a-8f17-fe141bc02b20" />
 
+#### Lock Screen
+<img width="400" alt="Lock Screen" src="https://github.com/user-attachments/assets/3c2b0ced-6efd-466a-8f17-fe141bc02b20" />
 
 #### Logout Confirmation
-<img width="582" alt="image" src="https://github.com/user-attachments/assets/7a8be3d3-4826-4ac1-aa1f-ae464de8d030" />
-
-
-## UI
-
-### Sidebar vs Popup
-
-This extension loads in a sidebar rather than a popup. This has many benefits:
- - Allows the user to navigate, click on, and interact with pages without forcing the popup closed. Clicking on links from within the extension does not close the extension and can be read simultaneously.
- - Allows the user to define the width and side of the browser they prefer
- - Makes the UI less cramped
- - Replicates a form factor which could easily be duplicated on a mobile device.
-
-### Navigation
-- **Onboarding Stepper**: The user is guided through the onboarding flow with a custom stepper.
-- **Swipe Navigation**: In the main wallet state, you can navigate between different sections (Home, Send, Transactions, Settings) by swiping left or right on the screen. This provides an intuitive touch-based navigation experience alongside the traditional navigation menu.
-
-## Security
-
-### Locking & Security
-
-- **Auto-lock:** The app automatically locks after a configurable period of inactivity (default: 5 minutes).
-- **Auto-lock Timer Setting:** Users can adjust the auto-lock timer in the Settings panel. This allows customization based on security preferences and usage patterns.
-- **Mnemonic security:** The mnemonic is never kept in memory when locked, and is only restored after successful unlock.
-- **Manual lock:** The user can lock the app at any time from the navigation bar.
-
-### Seed Phrase Protection
-
-- **Fake Display Protection**: When the mnemonic is in "hidden" state, the wallet displays fake text instead of the actual seed phrase. This prevents accidental exposure through browser developer tools, screen captures, or other inspection methods.
-- **Explicit Reveal**: The real seed phrase is only displayed when the user explicitly clicks the reveal button, providing an additional layer of security.
-
-### Browser Extension Security
-
-- **Manifest V3**: Built using Chrome's latest extension manifest version with strict Content Security Policy (CSP) for enhanced security.
-- **WASM Support**: Requires `wasm-unsafe-eval` in CSP to support cryptographic operations via WebAssembly for optimal performance and security.
-- **Chrome API Storage**: All sensitive data is stored locally within the extension's secure context. Less secure settings (wallet labels etc.) are stored in extensions sync settings and can be retrieved if the user logs in via another device.
-
-### Dependency Security
-
-- **Pinned Package Versions**: All Polkadot cryptographic packages are pinned to exact versions to prevent supply chain attacks and ensure reproducible builds. By removing version ranges (^), malicious code cannot be introduced through automatic package updates. This is especially important as we are allowing WASM eval in our csp.
-- **Audit Trail**: Specific versions can be audited and verified, providing transparency about exactly what code is running.
-- **Controlled Updates**: Any future updates to critical cryptographic dependencies require explicit review and approval.
-
-
-### Password Strength Requirements
-
-CruciVault uses **zxcvbn** library to measure password strength and enforce security requirements.
-
-#### Strength Levels
-- **Minimum Score**: Passwords must achieve a score of **3 (Good)** or higher
-- **Real-time Feedback**: Strength is evaluated as you type
-- **Detailed Suggestions**: Specific recommendations for improvement
-- **Warning Messages**: Alerts about common weak patterns i.e. repeated words or common passwords
+<img width="400" alt="Logout Confirmation" src="https://github.com/user-attachments/assets/7a8be3d3-4826-4ac1-aa1f-ae464de8d030" />
 
 ## Getting Started
 
@@ -154,28 +97,75 @@ npm run lint
 
 ## Architecture Decisions
 
-### Project Structure
+### Folder Structure
 
 - `src/` — React source code
 - `public/` — Static assets and extension manifest
 - `dist/` — Production build output
 
+## UI
+
+### Sidebar vs Popup
+
+This extension loads in a sidebar rather than a popup. This has many benefits:
+ - Allows the user to navigate, click on, and interact with pages without forcing the popup closed. Clicking on links from within the extension does not close the extension and can be read simultaneously.
+ - Allows the user to define the width and side of the browser they prefer
+ - Makes the UI less cramped
+ - Replicates a form factor which could easily be duplicated on a mobile device.
+
+### Navigation
+- **Onboarding Stepper**: The user is guided through the onboarding flow with a custom stepper.
+- **Swipe Navigation**: The main wallet state is goverened by react-router, you can navigate between different sections (Home, Send, Transactions, Settings) from the nav bar and navigate forward or backwards by swiping left or right on the screen as you would in a browser. This provides an intuitive touch-based navigation experience alongside the traditional navigation menu.
+
+### Component Libraries & Dependencies
+
+- **shadcn/ui**: Primary component library with "new-york" style variant, providing Button, Input, Dialog, Card, Tooltip, Progress, Stepper, and Navigation Menu components
+- **Radix UI**: Headless UI primitives for accessibility (Dialog, Navigation Menu, Progress, Slot, Tooltip)
+- **Lucide React**: Modern icon library used throughout the application for consistent visual language
+- **Tailwind CSS v4**: Utility-first CSS framework with custom neutral theme and CSS variables
 
 
-### Routing Architecture
+## Security
 
-**Conditional Route Rendering** based on wallet state:
+### Locking & Security
 
-- **No Wallet**: Shows onboarding flow at root path `/`
-- **Wallet Locked**: Shows lock screen with all routes redirecting to `/lock`
-- **Wallet Unlocked**: Shows main app routes (`/home`, `/send`, `/transactions`, `/settings`)
-- **Smart Navigation**: Automatic redirection based on wallet state changes
+- **Auto-lock:** The app automatically locks after a configurable period of inactivity (default: 5 minutes).
+- **Auto-lock Timer Setting:** Users can adjust the auto-lock timer in the Settings panel. This allows customization based on security preferences and usage patterns.
+- **Mnemonic security:** The mnemonic is never kept in memory when locked, and is only restored after successful unlock.
+- **Manual lock:** The user can lock the app at any time from the navigation bar.
+
+
+
+### Browser Extension Security
+
+- **Manifest V3**: Built using Chrome's latest extension manifest version with strict Content Security Policy (CSP) for enhanced security.
+- **WASM Support**: Requires `wasm-unsafe-eval` in CSP to support cryptographic operations via WebAssembly for optimal performance and security.
+- **Chrome API Storage**: All sensitive data is stored locally within the extension's secure context. Less secure settings (wallet labels etc.) are stored in extensions sync settings and can be retrieved if the user logs in via another device.
+- **Fake Display Protection**: On the mnemonic generation page when the mnemonic is in "hidden" state, the wallet displays fake text instead of the actual seed phrase. This prevents accidental exposure through browser developer tools, screen captures, or other inspection methods.
+
+### Dependency Security
+
+- **Pinned Package Versions**: All Polkadot cryptographic packages are pinned to exact versions to prevent supply chain attacks and ensure reproducible builds. By removing version ranges (^), malicious code cannot be introduced through automatic package updates. This is especially important as we are allowing WASM eval in our csp.
+- **Audit Trail**: Specific versions can be audited and verified, providing transparency about exactly what code is running.
+- **Controlled Updates**: Any future updates to critical cryptographic dependencies require explicit review and approval.
+
+
+### Password Strength Requirements
+
+CruciVault uses **zxcvbn** library to measure password strength and enforce security requirements.
+
+#### Strength Levels
+- **Minimum Score**: Passwords must achieve a score of **3 (Good)** or higher
+- **Real-time Feedback**: Strength is evaluated as you type
+- **Detailed Suggestions**: Specific recommendations for improvement
+- **Warning Messages**: Alerts about common weak patterns i.e. repeated words or common passwords
+
 
 ### Storage Architecture
 
 **Dual Storage Strategy** for security and convenience:
 
-- **Chrome Storage Local**: Sensitive data (encrypted mnemonics) - device-specific, not synced
+- **Chrome Storage Local**: Sensitive data (encrypted mnemonics) - device-specific, not synced across devices
 - **Chrome Storage Sync**: Non-sensitive data (wallet labels, settings) - synced across devices
 - **Automatic Separation**: Storage utility automatically routes data based on sensitivity
 
@@ -188,14 +178,6 @@ npm run lint
 - **Random Salt/IV**: Unique salt and initialization vector for each encryption
 - **Base64 Encoding**: Standard encoding for storage compatibility
 
-### Component Architecture
-
-**Modular Design** with clear separation of concerns:
-
-- **Layout Component**: Handles navigation visibility and background effects
-- **AppRouter**: Manages route rendering based on application state
-- **OnboardingStepper**: Multi-step flow with state preservation between steps
-- **Security Components**: Lock screen and security dialogs with consistent UX
 
 ### Development Architecture
 
@@ -204,29 +186,11 @@ npm run lint
 - **Path Aliases**: Clean imports using `@/`, `components/`, `lib/` aliases
 - **Vite Build**: Fast development with hot reload for extension development
 - **Chrome Extension APIs**: Manifest V3 with strict CSP for security
-- **Component Library**: Reusable UI components with consistent styling
-
-### Component Libraries & Dependencies
-
-**Modern UI Stack** built for security and user experience:
-
-- **shadcn/ui**: Primary component library with "new-york" style variant, providing Button, Input, Dialog, Card, Tooltip, Progress, Stepper, and Navigation Menu components
-- **Radix UI**: Headless UI primitives for accessibility (Dialog, Navigation Menu, Progress, Slot, Tooltip)
-- **Lucide React**: Modern icon library used throughout the application for consistent visual language
-- **Tailwind CSS v4**: Utility-first CSS framework with custom neutral theme and CSS variables
-
-**Blockchain & Cryptography**:
-
-- **Polkadot Ecosystem**: `@polkadot/api`, `@polkadot/keyring`, `@polkadot/react-identicon`, `@polkadot/util-crypto`, `@polkadot/wasm-crypto` for Bittensor network interaction
-- **Cryptography**: `@scure/bip39`, `bip39`, `zxcvbn` for mnemonic generation and password strength evaluation
-
-**Visual Effects & Development**:
-
-- **Three.js & Vanta**: 3D graphics and animated background effects
-- **React 19.1.0**: Latest React with TypeScript and React Router DOM 7.6.3
-- **Build Tools**: Vite with React plugin, TypeScript 5.8.3, ESLint, PostCSS
+- **Component Libraries**: Reusable UI components with consistent styling
 
 ## TODO
+
+remaining items to be completed next.
 
 ### Testing & Quality
 
