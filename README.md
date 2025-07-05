@@ -14,39 +14,47 @@ A secure Bittensor wallet browser extension.
 
 ### Onboarding Flow
 #### Welcome Screen
-[Screenshot of the initial welcome screen]
+<img width="591" alt="image" src="https://github.com/user-attachments/assets/d1c98ca0-33d1-49e6-b7a5-dab37190d486" />
+
 
 #### Security Warning
-[Screenshot of the security warning step]
+<img width="579" alt="image" src="https://github.com/user-attachments/assets/3f93b6fe-8ec6-473f-afa8-9b325c2ab9d3" />
 
-#### Wallet Generation
-[Screenshot of the wallet generation step with seed phrase]
+
+#### Seed Phrase Generation
+<img width="580" alt="image" src="https://github.com/user-attachments/assets/19914dc7-6b70-4010-a8c3-4229129bdd65" />
+
 
 #### Seed Phrase Validation
-[Screenshot of the seed phrase validation step]
+<img width="578" alt="image" src="https://github.com/user-attachments/assets/3f3e1020-75a0-4714-bedf-c88fabbfdbd8" />
+
 
 #### Password Setup
-[Screenshot of the password creation step]
+<img width="580" alt="image" src="https://github.com/user-attachments/assets/9b30cf58-2075-47df-8ab0-47346eb8394c" />
+<img width="579" alt="image" src="https://github.com/user-attachments/assets/c9e46255-dc32-4440-8983-771052c01444" />
+<img width="581" alt="image" src="https://github.com/user-attachments/assets/17d268ea-444a-4c32-a97a-4cfe840a403e" />
+<img width="578" alt="image" src="https://github.com/user-attachments/assets/1d359cb4-0c47-4dff-8bc4-0b9c0189b53a" />
+
+
+
+
 
 ### Main Application
 #### Wallet Home
-[Screenshot of the main wallet home screen with balance and address]
-
-#### Send Transaction
-[Screenshot of the send transaction interface]
-
-#### Transaction History
-[Screenshot of the transaction history view]
+<img width="580" alt="image" src="https://github.com/user-attachments/assets/b987423f-1ce9-4c5d-971e-a183016a43e3" />
 
 #### Settings
-[Screenshot of the settings panel with auto-lock configuration]
+<img width="585" alt="image" src="https://github.com/user-attachments/assets/3075a719-3913-427e-97c0-3cda028572e2" />
+
 
 ### Security
 #### Lock Screen
-[Screenshot of the wallet lock screen with password input]
+<img width="578" alt="image" src="https://github.com/user-attachments/assets/3c2b0ced-6efd-466a-8f17-fe141bc02b20" />
+
 
 #### Logout Confirmation
-[Screenshot of the logout confirmation dialog]
+<img width="582" alt="image" src="https://github.com/user-attachments/assets/7a8be3d3-4826-4ac1-aa1f-ae464de8d030" />
+
 
 ## UI
 
