@@ -13,68 +13,7 @@ import { Transactions } from "components/Transactions";
 import { Settings } from "components/Settings";
 import { Lock } from "components/Lock";
 import { useSecurity } from "contexts/SecurityContext";
-
-declare global {
-  interface Window {
-    chrome?: {
-      storage?: {
-        sync?: {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          get: (keys: string[], cb: (result: any) => void) => void;
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          set: (data: any, cb: () => void) => void;
-        };
-      };
-    };
-  }
-}
-
-// Helper to get storage (sync in extension, localStorage in dev)
-const getStorage = () => {
-  if (window.chrome?.storage?.sync) {
-    return {
-      get: (keys: string[]) =>
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        new Promise<any>((resolve) =>
-          window.chrome!.storage!.sync!.get(keys, resolve)
-        ),
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      set: (data: any) =>
-        new Promise<void>((resolve) =>
-          window.chrome!.storage!.sync!.set(data, resolve)
-        ),
-    };
-  } else {
-    // Fallback for dev: use localStorage
-    return {
-      get: async (keys: string[]) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const result: any = {};
-        keys.forEach((key) => {
-          const val = localStorage.getItem(key);
-          if (val) {
-            try {
-              // Try to parse as JSON first
-              result[key] = JSON.parse(val);
-            } catch {
-              // If parsing fails, use the raw value
-              result[key] = val;
-            }
-          } else {
-            result[key] = undefined;
-          }
-        });
-        return result;
-      },
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      set: async (data: any) => {
-        Object.entries(data).forEach(([key, value]) => {
-          localStorage.setItem(key, JSON.stringify(value));
-        });
-      },
-    };
-  }
-};
+import { storage } from "lib/storage";
 
 export const AppRouter: React.FC = () => {
   const [hasWallet, setHasWallet] = useState<boolean | null>(null);
@@ -98,7 +37,7 @@ export const AppRouter: React.FC = () => {
         if (isUnmounted) return;
         console.log("AppRouter: Checking wallet setup...");
         setIsLoading(true);
-        const stored = await getStorage().get(["encryptedMnemonic"]);
+        const stored = await storage.get(["encryptedMnemonic"]);
         console.log("AppRouter: Storage check result:", stored);
         if (!stored.encryptedMnemonic) {
           console.log("AppRouter: No wallet exists, showing onboarding");
@@ -162,7 +101,7 @@ export const AppRouter: React.FC = () => {
         console.log(
           "AppRouter: SecurityContext state changed, re-checking wallet..."
         );
-        const stored = await getStorage().get(["encryptedMnemonic"]);
+        const stored = await storage.get(["encryptedMnemonic"]);
         console.log("AppRouter: Re-check result:", stored);
         if (stored.encryptedMnemonic && !hasWallet) {
           console.log(
@@ -175,21 +114,24 @@ export const AppRouter: React.FC = () => {
     recheckWallet();
   }, [isLocked, isLoading, hasWallet]);
 
-  // Navigate to home when wallet is detected and not locked, but only if not already there
+  // Only navigate to /home if wallet is unlocked and not already on /home
   useEffect(() => {
-    console.log("AppRouter: Navigation effect triggered - hasWallet:", hasWallet, "isLoading:", isLoading, "isLocked:", isLocked, "location.pathname:", location.pathname);
-
-    if (hasWallet && !isLoading && !isLocked) {
-      // Only navigate to home if we're on the root path or an invalid path
-      // Don't navigate away from valid app routes like /settings, /send, etc.
-      if (location.pathname === "/" || location.pathname === "/onboarding" || location.pathname.startsWith("/onboarding/")) {
-        console.log("AppRouter: Wallet detected and unlocked, navigating to home from:", location.pathname);
-        navigate("/home", { replace: true });
-      } else {
-        console.log("AppRouter: Staying on current path:", location.pathname);
-      }
+    if (
+      hasWallet &&
+      !isLoading &&
+      !isLocked &&
+      location.pathname !== "/home" &&
+      (location.pathname === "/" ||
+        location.pathname === "/onboarding" ||
+        location.pathname.startsWith("/onboarding/"))
+    ) {
+      console.log(
+        "AppRouter: Wallet detected and unlocked, navigating to home from:",
+        location.pathname
+      );
+      navigate("/home", { replace: true });
     }
-  }, [hasWallet, isLoading, isLocked, navigate, location.pathname]);
+  }, [hasWallet, isLoading, isLocked, location.pathname, navigate]);
 
   // Show loading state
   if (isLoading) {
@@ -212,16 +154,25 @@ export const AppRouter: React.FC = () => {
   if (hasWallet) {
     // If wallet exists but is locked, show lock screen
     if (isLocked) {
+      console.log(
+        "AppRouter: Rendering lock screen for path:",
+        location.pathname
+      );
       return (
         <Routes>
           <Route path="/" element={<Navigate to="/lock" replace />} />
           <Route path="/lock" element={<Lock />} />
+          <Route path="/index.html" element={<Navigate to="/lock" replace />} />
           <Route path="*" element={<Navigate to="/lock" replace />} />
         </Routes>
       );
     }
 
     // If wallet exists and is unlocked, show main app routes
+    console.log(
+      "AppRouter: Rendering main app routes for path:",
+      location.pathname
+    );
     return (
       <Routes>
         <Route path="/" element={<Navigate to="/home" replace />} />
@@ -230,14 +181,17 @@ export const AppRouter: React.FC = () => {
         <Route path="/transactions" element={<Transactions />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/lock" element={<Lock />} />
+        <Route path="/index.html" element={<Navigate to="/home" replace />} />
         <Route path="*" element={<Navigate to="/home" replace />} />
       </Routes>
     );
   } else {
     // If no wallet exists, show onboarding
+    console.log("AppRouter: Rendering onboarding for path:", location.pathname);
     return (
       <Routes>
         <Route path="/" element={<OnboardingStepper />} />
+        <Route path="/index.html" element={<Navigate to="/" replace />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     );

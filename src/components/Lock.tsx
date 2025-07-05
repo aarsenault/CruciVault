@@ -4,6 +4,7 @@ import { Input } from "components/ui/input";
 import { useSecurity } from "contexts/SecurityContext";
 import { decryptMnemonic } from "lib/crypto";
 import { useNavigate } from "react-router-dom";
+import { storage } from "lib/storage";
 import {
   Dialog,
   DialogContent,
@@ -16,58 +17,6 @@ import {
   LogOut as LogOutIcon,
   AlertTriangle as AlertTriangleIcon,
 } from "lucide-react";
-
-declare global {
-  interface Window {
-    chrome?: {
-      storage?: {
-        sync?: {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          get: (keys: string[], cb: (result: any) => void) => void;
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          set: (data: any, cb: () => void) => void;
-        };
-      };
-    };
-  }
-}
-
-// Helper to get storage (sync in extension, localStorage in dev)
-const getStorage = () => {
-  if (window.chrome?.storage?.sync) {
-    return {
-      get: (keys: string[]) =>
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        new Promise<any>((resolve) =>
-          window.chrome!.storage!.sync!.get(keys, resolve)
-        ),
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      set: (data: any) =>
-        new Promise<void>((resolve) =>
-          window.chrome!.storage!.sync!.set(data, resolve)
-        ),
-    };
-  } else {
-    // Fallback for dev: use localStorage
-    return {
-      get: async (keys: string[]) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const result: any = {};
-        keys.forEach((key) => {
-          const val = localStorage.getItem(key);
-          result[key] = val ? JSON.parse(val) : undefined;
-        });
-        return result;
-      },
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      set: async (data: any) => {
-        Object.entries(data).forEach(([key, value]) => {
-          localStorage.setItem(key, JSON.stringify(value));
-        });
-      },
-    };
-  }
-};
 
 export const Lock: React.FC = () => {
   const { unlockApp, clearMnemonic } = useSecurity();
@@ -90,7 +39,7 @@ export const Lock: React.FC = () => {
 
     try {
       // Get stored encrypted mnemonic
-      const stored = await getStorage().get(["encryptedMnemonic"]);
+      const stored = await storage.get(["encryptedMnemonic"]);
 
       if (!stored.encryptedMnemonic) {
         setError("No wallet found");
@@ -99,14 +48,12 @@ export const Lock: React.FC = () => {
 
       // Decrypt mnemonic
       const mnemonic = await decryptMnemonic(
-        stored.encryptedMnemonic,
+        stored.encryptedMnemonic as string,
         password
       );
 
       // Unlock the app with the decrypted mnemonic
       unlockApp(mnemonic);
-
-      console.log("Lock: Unlock successful");
     } catch (error) {
       console.error("Lock: Unlock failed:", error);
       setError("Incorrect password");
@@ -115,6 +62,7 @@ export const Lock: React.FC = () => {
     }
   };
 
+  // TODO - make this a hook to use elsewhere
   const handleLogOut = async () => {
     setIsLoggingOut(true);
     setShowLogoutDialog(false);
@@ -123,10 +71,10 @@ export const Lock: React.FC = () => {
       clearMnemonic();
 
       // Remove encrypted mnemonic from storage
-      await getStorage().set({ encryptedMnemonic: null });
+      await storage.set({ encryptedMnemonic: null });
 
       // Remove wallet data from storage
-      await getStorage().set({ walletData: null });
+      await storage.set({ walletData: null });
 
       // Navigate to onboarding
       navigate("/onboarding/warning", { replace: true });

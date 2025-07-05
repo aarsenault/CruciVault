@@ -4,8 +4,11 @@ import React, {
   useState,
   useEffect,
   useMemo,
+  useCallback,
+  useRef,
   type ReactNode,
 } from "react";
+import { storage } from "lib/storage";
 
 interface SecurityContextType {
   isLocked: boolean;
@@ -15,6 +18,7 @@ interface SecurityContextType {
   getMnemonic: () => string | null;
   clearMnemonic: () => void;
   resetActivityTimer: () => void;
+  refreshSettings: () => Promise<void>;
 }
 
 const SecurityContext = createContext<SecurityContextType | undefined>(
@@ -25,69 +29,88 @@ interface SecurityProviderProps {
   children: ReactNode;
 }
 
-declare global {
-  interface Window {
-    chrome?: {
-      storage?: {
-        sync?: {
-          get: (keys: string[], cb: (result: any) => void) => void;
-          set: (data: any, cb: () => void) => void;
-        };
-      };
-    };
-  }
-}
-
-// Helper to get storage (sync in extension, localStorage in dev)
-const getStorage = () => {
-  if (window.chrome?.storage?.sync) {
-    return {
-      get: (keys: string[]) =>
-        new Promise<any>((resolve) =>
-          window.chrome!.storage!.sync!.get(keys, resolve)
-        ),
-      set: (data: any) =>
-        new Promise<void>((resolve) =>
-          window.chrome!.storage!.sync!.set(data, resolve)
-        ),
-    };
-  } else {
-    // Fallback for dev: use localStorage
-    return {
-      get: async (keys: string[]) => {
-        const result: any = {};
-        keys.forEach((key) => {
-          const val = localStorage.getItem(key);
-          if (val) {
-            try {
-              // Try to parse as JSON first
-              result[key] = JSON.parse(val);
-            } catch {
-              // If parsing fails, use the raw value
-              result[key] = val;
-            }
-          } else {
-            result[key] = undefined;
-          }
-        });
-        return result;
-      },
-      set: async (data: any) => {
-        Object.entries(data).forEach(([key, value]) => {
-          localStorage.setItem(key, JSON.stringify(value));
-        });
-      },
-    };
-  }
-};
-
 export const SecurityProvider: React.FC<SecurityProviderProps> = ({
   children,
 }) => {
   const [isLocked, setIsLocked] = useState(true); // Start locked by default
   const [mnemonic, setMnemonic] = useState<string | null>(null);
-  const [lockTimer, setLockTimer] = useState<NodeJS.Timeout | null>(null);
   const [lockTimerMinutes, setLockTimerMinutes] = useState(5);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const lastActivityRef = useRef<number>(0);
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Define lockApp without dependencies to prevent circular dependency
+  const lockApp = useCallback(() => {
+    setIsLocked(true);
+    setMnemonic(null); // Clear mnemonic from memory
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+      debounceTimerRef.current = null;
+    }
+  }, []);
+
+  // Define resetActivityTimer without lockApp dependency
+  const resetActivityTimer = useCallback(() => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+    }
+
+    if (!isLocked && mnemonic) {
+      const timeoutMs = lockTimerMinutes * 60 * 1000;
+
+      timerRef.current = setTimeout(() => {
+        lockApp();
+      }, timeoutMs);
+    }
+  }, [lockTimerMinutes, isLocked, mnemonic, lockApp]);
+
+  // Debounced activity handler
+  const handleActivity = useCallback(() => {
+    if (isLocked) return;
+
+    const now = Date.now();
+    const timeSinceLastActivity = now - lastActivityRef.current;
+    const minTimeBetweenResets = 1000; // 1 second minimum between resets
+
+    // Only reset if enough time has passed since last activity
+    if (timeSinceLastActivity >= minTimeBetweenResets) {
+      lastActivityRef.current = now;
+      resetActivityTimer();
+    }
+  }, [isLocked, resetActivityTimer]);
+
+  // Set up activity listeners with debouncing
+  useEffect(() => {
+    const events = ["mousedown", "keypress", "scroll", "touchstart", "click"];
+
+    events.forEach((event) => {
+      document.addEventListener(event, handleActivity, true);
+    });
+
+    return () => {
+      events.forEach((event) => {
+        document.removeEventListener(event, handleActivity, true);
+      });
+    };
+  }, [isLocked, handleActivity]);
+
+  // Reset timer when lockTimerMinutes changes and app is unlocked
+  useEffect(() => {
+    if (!isLocked && mnemonic) {
+      resetActivityTimer();
+    }
+  }, [lockTimerMinutes, isLocked, mnemonic, resetActivityTimer]);
+
+  // Reset timer when app unlocks
+  useEffect(() => {
+    if (!isLocked && mnemonic) {
+      resetActivityTimer();
+    }
+  }, [isLocked, mnemonic, resetActivityTimer]);
 
   // Load settings and check wallet state on mount
   useEffect(() => {
@@ -95,38 +118,16 @@ export const SecurityProvider: React.FC<SecurityProviderProps> = ({
     checkWalletState();
   }, []);
 
-  // Set up activity listeners
-  useEffect(() => {
-    const resetTimer = () => {
-      if (!isLocked) {
-        resetActivityTimer();
-      }
-    };
-    const events = [
-      "mousedown",
-      "mousemove",
-      "keypress",
-      "scroll",
-      "touchstart",
-      "click",
-    ];
-    events.forEach((event) => {
-      document.addEventListener(event, resetTimer, true);
-    });
-    return () => {
-      events.forEach((event) => {
-        document.removeEventListener(event, resetTimer, true);
-      });
-    };
-  }, [isLocked]);
-
   const loadSettings = async () => {
     try {
-      const stored = await getStorage().get(["appSettings"]);
-      if (stored.appSettings?.lockTimerMinutes) {
+      const stored = await storage.get(["appSettings"]);
+      const appSettings = stored.appSettings as
+        | { lockTimerMinutes?: number }
+        | undefined;
+      if (appSettings?.lockTimerMinutes) {
         setLockTimerMinutes((prev) =>
-          prev !== stored.appSettings.lockTimerMinutes
-            ? stored.appSettings.lockTimerMinutes
+          prev !== appSettings.lockTimerMinutes
+            ? appSettings.lockTimerMinutes!
             : prev
         );
       }
@@ -137,55 +138,51 @@ export const SecurityProvider: React.FC<SecurityProviderProps> = ({
 
   const checkWalletState = async () => {
     try {
-      const stored = await getStorage().get(["encryptedMnemonic"]);
+      const stored = await storage.get(["encryptedMnemonic"]);
       // If no mnemonic exists, the app should not be locked (show wallet setup)
       if (!stored.encryptedMnemonic) {
-        setIsLocked((prev) => (prev !== false ? false : prev));
+        setIsLocked(false);
       }
       // If mnemonic exists, stay locked until user unlocks
     } catch (error) {
       console.error("Failed to check wallet state:", error);
       // On error, assume no wallet exists
-      setIsLocked((prev) => (prev !== false ? false : prev));
+      setIsLocked(false);
     }
   };
 
-  const resetActivityTimer = () => {
-    if (lockTimer) {
-      clearTimeout(lockTimer);
-    }
-    const timer = setTimeout(() => {
-      lockApp();
-    }, lockTimerMinutes * 60 * 1000);
-    setLockTimer(timer);
-  };
+  const unlockApp = useCallback(
+    (newMnemonic: string) => {
+      setIsLocked(false);
+      setMnemonic(newMnemonic);
+      lastActivityRef.current = Date.now(); // Set initial activity time
+      resetActivityTimer();
+    },
+    [resetActivityTimer]
+  );
 
-  const lockApp = () => {
-    setIsLocked((prev) => (prev !== true ? true : prev));
-    setMnemonic((prev) => (prev !== null ? null : prev)); // Clear mnemonic from memory
-    if (lockTimer) {
-      clearTimeout(lockTimer);
-      setLockTimer(null);
-    }
-    // Let AppRouter handle navigation based on lock state
-  };
-
-  const unlockApp = (newMnemonic: string) => {
-    setIsLocked((prev) => (prev !== false ? false : prev));
-    setMnemonic((prev) => (prev !== newMnemonic ? newMnemonic : prev));
-    resetActivityTimer();
-  };
-
-  const getMnemonic = (): string | null => {
+  const getMnemonic = useCallback((): string | null => {
     if (isLocked) {
       return null; // Never return mnemonic when locked
     }
     return mnemonic;
-  };
+  }, [isLocked, mnemonic]);
 
-  const clearMnemonic = () => {
-    setMnemonic((prev) => (prev !== null ? null : prev));
-  };
+  const clearMnemonic = useCallback(() => {
+    setMnemonic(null);
+  }, []);
+
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, []);
 
   // Memoize context value to prevent unnecessary re-renders
   const value = useMemo<SecurityContextType>(
@@ -197,8 +194,18 @@ export const SecurityProvider: React.FC<SecurityProviderProps> = ({
       getMnemonic,
       clearMnemonic,
       resetActivityTimer,
+      refreshSettings: loadSettings,
     }),
-    [isLocked, mnemonic]
+    [
+      isLocked,
+      mnemonic,
+      lockApp,
+      unlockApp,
+      getMnemonic,
+      clearMnemonic,
+      resetActivityTimer,
+      loadSettings,
+    ]
   );
 
   return (

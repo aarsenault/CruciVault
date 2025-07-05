@@ -10,21 +10,6 @@ interface ValidateStepProps {
   onBack: () => void;
 }
 
-declare global {
-  interface Window {
-    chrome?: {
-      storage?: {
-        sync?: {
-          get: (keys: string[], cb: (result: any) => void) => void;
-          set: (data: any, cb: () => void) => void;
-        };
-      };
-    };
-  }
-}
-
-
-
 export const ValidateStep: React.FC<ValidateStepProps> = ({
   mnemonic,
   address: _address,

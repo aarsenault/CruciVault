@@ -8,6 +8,7 @@ import { Stepper } from "components/ui/stepper";
 import { generateWallet } from "lib/bittensor";
 import { encryptMnemonic } from "lib/crypto";
 import { useSecurity } from "contexts/SecurityContext";
+import { storage } from "lib/storage";
 
 type OnboardingStep = "home" | "warning" | "generate" | "validate" | "password";
 
@@ -72,18 +73,8 @@ export const OnboardingStepper: React.FC = () => {
         );
 
         console.log("completeOnboarding: storing encrypted mnemonic");
-        // Store in Chrome extension storage or localStorage
-        if (window.chrome?.storage?.sync) {
-          await new Promise<void>((resolve) => {
-            window.chrome!.storage!.sync!.set({ encryptedMnemonic }, resolve);
-          });
-        } else {
-          // TODO - change this to chrome storage, not sync. Don't use localStorage.
-          localStorage.setItem(
-            "encryptedMnemonic",
-            JSON.stringify(encryptedMnemonic)
-          );
-        }
+        // Store encrypted mnemonic using the storage utility
+        await storage.set({ encryptedMnemonic });
         console.log("completeOnboarding: mnemonic stored successfully");
 
         // Wait a moment for storage to be fully written
@@ -104,6 +95,10 @@ export const OnboardingStepper: React.FC = () => {
           );
           window.dispatchEvent(new CustomEvent("walletCreated"));
         }, 500);
+
+        // Don't set isCompleting to false on success - let AppRouter take over
+        // The component will unmount when AppRouter detects the wallet
+        return;
       } else {
         console.log("completeOnboarding: missing mnemonic or password", {
           hasMnemonic: !!onboardingState.mnemonic,
@@ -117,7 +112,7 @@ export const OnboardingStepper: React.FC = () => {
     } catch (error) {
       console.error("Failed to complete onboarding:", error);
       setError("Failed to save wallet. Please try again.");
-    } finally {
+      // Only set isCompleting to false on error
       setIsCompleting(false);
     }
   };

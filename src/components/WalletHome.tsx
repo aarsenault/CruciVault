@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { getTaoBalance, getAddressFromMnemonic } from "lib/bittensor";
 import { Input } from "components/ui/input";
 import Identicon from "@polkadot/react-identicon";
+import { storage } from "lib/storage";
 import {
   Dialog,
   DialogContent,
@@ -34,52 +35,6 @@ interface WalletData {
   balance: string | null;
   balanceHistory: Array<{ date: string; balance: number }>;
 }
-
-declare global {
-  interface Window {
-    chrome?: {
-      storage?: {
-        sync?: {
-          get: (keys: string[], cb: (result: any) => void) => void;
-          set: (data: any, cb: () => void) => void;
-        };
-      };
-    };
-  }
-}
-
-// Helper to get storage (sync in extension, localStorage in dev)
-const getStorage = () => {
-  if (window.chrome?.storage?.sync) {
-    return {
-      get: (keys: string[]) =>
-        new Promise<any>((resolve) =>
-          window.chrome!.storage!.sync!.get(keys, resolve)
-        ),
-      set: (data: any) =>
-        new Promise<void>((resolve) =>
-          window.chrome!.storage!.sync!.set(data, resolve)
-        ),
-    };
-  } else {
-    // Fallback for dev: use localStorage
-    return {
-      get: async (keys: string[]) => {
-        const result: any = {};
-        keys.forEach((key) => {
-          const val = localStorage.getItem(key);
-          result[key] = val ? JSON.parse(val) : undefined;
-        });
-        return result;
-      },
-      set: async (data: any) => {
-        Object.entries(data).forEach(([key, value]) => {
-          localStorage.setItem(key, JSON.stringify(value));
-        });
-      },
-    };
-  }
-};
 
 export const WalletHome: React.FC = () => {
   const navigate = useNavigate();
@@ -164,13 +119,16 @@ export const WalletHome: React.FC = () => {
         "WalletHome: Loading wallet data for address:",
         walletAddress
       );
-      const stored = await getStorage().get(["walletData"]);
+      const stored = await storage.get(["walletData"]);
       console.log("WalletHome: Retrieved wallet data from storage:", stored);
 
-      if (stored.walletData && stored.walletData[walletAddress]) {
+      const walletData = stored.walletData as
+        | Record<string, WalletData>
+        | undefined;
+      if (walletData && walletData[walletAddress]) {
         console.log("WalletHome: Found existing wallet data");
-        setWalletData(stored.walletData[walletAddress]);
-        setNewLabel(stored.walletData[walletAddress].label || "");
+        setWalletData(walletData[walletAddress]);
+        setNewLabel(walletData[walletAddress].label || "");
       } else {
         console.log("WalletHome: No existing wallet data, creating new data");
         // Initialize new wallet data
@@ -201,10 +159,11 @@ export const WalletHome: React.FC = () => {
 
   const saveWalletData = async (data: WalletData) => {
     try {
-      const stored = await getStorage().get(["walletData"]);
-      const walletData = stored.walletData || {};
+      const stored = await storage.get(["walletData"]);
+      const walletData =
+        (stored.walletData as Record<string, WalletData>) || {};
       walletData[data.address] = data;
-      await getStorage().set({ walletData });
+      await storage.set({ walletData });
     } catch (error) {
       console.error("WalletHome: Failed to save wallet data:", error);
     }

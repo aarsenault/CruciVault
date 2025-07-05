@@ -4,6 +4,7 @@ import { Button } from "components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useSecurity } from "contexts/SecurityContext";
 import { getAddressFromMnemonic } from "lib/bittensor";
+import { storage } from "lib/storage";
 import {
   Dialog,
   DialogContent,
@@ -33,55 +34,10 @@ interface AppSettings {
   lockTimerMinutes: number;
 }
 
-declare global {
-  interface Window {
-    chrome?: {
-      storage?: {
-        sync?: {
-          get: (keys: string[], cb: (result: any) => void) => void;
-          set: (data: any, cb: () => void) => void;
-        };
-      };
-    };
-  }
-}
-
-// Helper to get storage (sync in extension, localStorage in dev)
-const getStorage = () => {
-  if (window.chrome?.storage?.sync) {
-    return {
-      get: (keys: string[]) =>
-        new Promise<any>((resolve) =>
-          window.chrome!.storage!.sync!.get(keys, resolve)
-        ),
-      set: (data: any) =>
-        new Promise<void>((resolve) =>
-          window.chrome!.storage!.sync!.set(data, resolve)
-        ),
-    };
-  } else {
-    // Fallback for dev: use localStorage
-    return {
-      get: async (keys: string[]) => {
-        const result: any = {};
-        keys.forEach((key) => {
-          const val = localStorage.getItem(key);
-          result[key] = val ? JSON.parse(val) : undefined;
-        });
-        return result;
-      },
-      set: async (data: any) => {
-        Object.entries(data).forEach(([key, value]) => {
-          localStorage.setItem(key, JSON.stringify(value));
-        });
-      },
-    };
-  }
-};
-
 export const Settings: React.FC = () => {
   const navigate = useNavigate();
-  const { getMnemonic, clearMnemonic, isLocked } = useSecurity();
+  const { getMnemonic, clearMnemonic, isLocked, refreshSettings } =
+    useSecurity();
 
   const [settings, setSettings] = useState<AppSettings>({
     lockTimerMinutes: 5,
@@ -92,30 +48,23 @@ export const Settings: React.FC = () => {
   const [isAddressLoading, setIsAddressLoading] = useState(true);
 
   useEffect(() => {
-    console.log("Settings: useEffect triggered, isLocked:", isLocked);
-
     // If the app is locked, redirect to lock screen
     if (isLocked) {
-      console.log("Settings: App is locked, redirecting to lock screen");
       navigate("/lock");
       return;
     }
 
     const mnemonic = getMnemonic();
-    console.log("Settings: getMnemonic returned:", mnemonic ? "has mnemonic" : "no mnemonic");
 
     if (!mnemonic) {
       // If no mnemonic and not locked, redirect to onboarding
-      console.log("Settings: No mnemonic and not locked, redirecting to onboarding");
       navigate("/onboarding/warning");
       return;
     }
 
-    console.log("Settings: Loading settings and address...");
     setIsAddressLoading(true);
     getAddressFromMnemonic(mnemonic)
       .then(() => {
-        console.log("Settings: Address loaded successfully");
         setIsAddressLoading(false);
       })
       .catch((error) => {
@@ -127,9 +76,10 @@ export const Settings: React.FC = () => {
 
   const loadSettings = async () => {
     try {
-      const stored = await getStorage().get(["appSettings"]);
-      if (stored.appSettings) {
-        setSettings(stored.appSettings);
+      const stored = await storage.get(["appSettings"]);
+      const appSettings = stored.appSettings as AppSettings | undefined;
+      if (appSettings) {
+        setSettings(appSettings);
       } else {
         // Default settings
         const defaultSettings: AppSettings = { lockTimerMinutes: 5 };
@@ -143,9 +93,11 @@ export const Settings: React.FC = () => {
 
   const saveSettings = async (newSettings: AppSettings) => {
     try {
-      await getStorage().set({ appSettings: newSettings });
+      await storage.set({ appSettings: newSettings });
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 2000);
+      // Refresh settings in SecurityContext
+      await refreshSettings();
     } catch (error) {
       console.error("Failed to save settings:", error);
     }
@@ -161,24 +113,20 @@ export const Settings: React.FC = () => {
     saveSettings(newSettings);
   };
 
+  // TODO - make this a hook and use elsewhere
   const handleLogOut = async () => {
     setIsLoggingOut(true);
     setShowLogoutDialog(false);
     try {
-      // Clear mnemonic from memory
       clearMnemonic();
 
-      // Remove encrypted mnemonic from storage
-      await getStorage().set({ encryptedMnemonic: null });
+      await storage.set({ encryptedMnemonic: null });
 
-      // Remove wallet data from storage
-      await getStorage().set({ walletData: null });
+      await storage.set({ walletData: null });
 
-      // Navigate to onboarding
       navigate("/onboarding/warning", { replace: true });
     } catch (error) {
       console.error("Failed to log out:", error);
-      // Even if storage clear fails, still navigate to onboarding
       navigate("/onboarding/warning", { replace: true });
     } finally {
       setIsLoggingOut(false);
@@ -186,10 +134,8 @@ export const Settings: React.FC = () => {
   };
 
   const mnemonic = getMnemonic();
-  console.log("Settings: Render check - mnemonic:", mnemonic ? "has mnemonic" : "no mnemonic", "isAddressLoading:", isAddressLoading);
 
   if (!mnemonic || isAddressLoading) {
-    console.log("Settings: Showing loading screen");
     return (
       <div className="flex flex-col gap-6 items-center">
         <div className="text-white text-center text-xl">

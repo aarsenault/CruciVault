@@ -14,6 +14,7 @@ import {
   Settings as SettingsIcon,
   Lock as LockIcon,
 } from "lucide-react";
+import { storage } from "lib/storage";
 
 interface LocationState {
   mnemonic: string;
@@ -28,52 +29,6 @@ interface Transaction {
   timestamp: string;
   status: "pending" | "confirmed" | "failed";
 }
-
-declare global {
-  interface Window {
-    chrome?: {
-      storage?: {
-        sync?: {
-          get: (keys: string[], cb: (result: any) => void) => void;
-          set: (data: any, cb: () => void) => void;
-        };
-      };
-    };
-  }
-}
-
-// Helper to get storage (sync in extension, localStorage in dev)
-const getStorage = () => {
-  if (window.chrome?.storage?.sync) {
-    return {
-      get: (keys: string[]) =>
-        new Promise<any>((resolve) =>
-          window.chrome!.storage!.sync!.get(keys, resolve)
-        ),
-      set: (data: any) =>
-        new Promise<void>((resolve) =>
-          window.chrome!.storage!.sync!.set(data, resolve)
-        ),
-    };
-  } else {
-    // Fallback for dev: use localStorage
-    return {
-      get: async (keys: string[]) => {
-        const result: any = {};
-        keys.forEach((key) => {
-          const val = localStorage.getItem(key);
-          result[key] = val ? JSON.parse(val) : undefined;
-        });
-        return result;
-      },
-      set: async (data: any) => {
-        Object.entries(data).forEach(([key, value]) => {
-          localStorage.setItem(key, JSON.stringify(value));
-        });
-      },
-    };
-  }
-};
 
 export const Transactions: React.FC = () => {
   const navigate = useNavigate();
@@ -95,9 +50,12 @@ export const Transactions: React.FC = () => {
 
   const loadTransactions = async () => {
     try {
-      const stored = await getStorage().get(["transactions"]);
-      if (stored.transactions && stored.transactions[address]) {
-        setTransactions(stored.transactions[address]);
+      const stored = await storage.get(["transactions"]);
+      const transactions = stored.transactions as
+        | Record<string, Transaction[]>
+        | undefined;
+      if (transactions && transactions[address]) {
+        setTransactions(transactions[address]);
       } else {
         // For now, show some sample transactions
         const sampleTransactions: Transaction[] = [
@@ -121,9 +79,9 @@ export const Transactions: React.FC = () => {
         setTransactions(sampleTransactions);
 
         // Save sample data
-        const allTransactions = stored.transactions || {};
+        const allTransactions = transactions || {};
         allTransactions[address] = sampleTransactions;
-        await getStorage().set({ transactions: allTransactions });
+        await storage.set({ transactions: allTransactions });
       }
     } catch (error) {
       console.error("Failed to load transactions:", error);

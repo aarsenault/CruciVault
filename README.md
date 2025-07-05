@@ -19,7 +19,8 @@ A secure Bittensor wallet extension for Chrome.
 
 ### Locking & Security
 
-- **Auto-lock:** The app automatically locks after 5 minutes of inactivity (default, configurable in Settings).
+- **Auto-lock:** The app automatically locks after a configurable period of inactivity (default: 5 minutes).
+- **Auto-lock Timer Setting:** Users can adjust the auto-lock timer in the Settings panel, ranging from 1 to 60 minutes. This allows customization based on security preferences and usage patterns.
 - **Lock screen:** When locked, the mnemonic is removed from memory and the user must enter their password to unlock.
 - **Password:** On first lock, the user sets a password. On subsequent unlocks, the password is required.
 - **Mnemonic security:** The mnemonic is never kept in memory when locked, and is only restored after successful unlock.
