@@ -3,7 +3,7 @@
 A secure Bittensor wallet browser extension.
 
 ## Features
-
+- Creates a persistent wallet loaded in a sidebar
 - Generate and restore Bittensor wallets
 - Secure password protection
 - Extension auto-locks after a user specified period of inactivity.
