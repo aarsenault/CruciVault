@@ -42,8 +42,10 @@ A secure Bittensor wallet browser extension.
 ### Main Application
 
 #### Wallet Home
-<img width="535" alt="image" src="https://github.com/user-attachments/assets/0fea9d5b-6411-4a51-a637-a4330882e019" />
-<img width="542" alt="image" src="https://github.com/user-attachments/assets/5331ec52-9d83-4ba4-9126-947f1f7f84b1" />
+<div style="display: flex; gap: 10px; flex-wrap: wrap; margin: 10px 0;">
+  <img width="400" alt="image" src="https://github.com/user-attachments/assets/0fea9d5b-6411-4a51-a637-a4330882e019" />
+  <img width="400" alt="image" src="https://github.com/user-attachments/assets/5331ec52-9d83-4ba4-9126-947f1f7f84b1" />
+</div>
 
 
 #### Settings
