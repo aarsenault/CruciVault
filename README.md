@@ -5,6 +5,7 @@ A secure Bittensor wallet browser extension.
 ## Features
 - Creates a persistent wallet loaded in a sidebar
 - Generate and restore Bittensor wallets
+- Able to receive TAO to wallet address
 - Secure password protection
 - Extension auto-locks after a user specified period of inactivity.
 - Send and receive TAO (coming soon)
@@ -41,7 +42,9 @@ A secure Bittensor wallet browser extension.
 ### Main Application
 
 #### Wallet Home
-<img width="400" alt="Wallet Home" src="https://github.com/user-attachments/assets/b987423f-1ce9-4c5d-971e-a183016a43e3" />
+<img width="535" alt="image" src="https://github.com/user-attachments/assets/0fea9d5b-6411-4a51-a637-a4330882e019" />
+<img width="542" alt="image" src="https://github.com/user-attachments/assets/5331ec52-9d83-4ba4-9126-947f1f7f84b1" />
+
 
 #### Settings
 <img width="400" alt="Settings" src="https://github.com/user-attachments/assets/3075a719-3913-427e-97c0-3cda028572e2" />
